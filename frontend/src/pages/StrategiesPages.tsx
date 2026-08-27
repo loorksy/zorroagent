@@ -13,8 +13,8 @@ export function StrategiesPage() {
     <div className="space-y-3">
       <div className="flex justify-between">
         <h1 className="text-xl font-semibold">{t("nav.strategies")}</h1>
-        <Link to="/strategies/new" className="px-3 py-2 rounded bg-accent text-primary">
-          New
+        <Link to="/strategies/new" className="px-3 py-2 rounded bg-foreground text-primary-fg min-h-11 inline-flex items-center">
+          {t("buttons.new")}
         </Link>
       </div>
       <ul>
@@ -23,7 +23,7 @@ export function StrategiesPage() {
             {s.name}
             <span className="flex gap-3 text-sm">
               <Link to={`/strategies/${s.id}/optimize`}>{t("buttons.optimize")}</Link>
-              <Link to={`/strategies/${s.id}/versions`}>versions</Link>
+              <Link to={`/strategies/${s.id}/versions`}>{t("buttons.versions")}</Link>
             </span>
           </li>
         ))}
@@ -56,7 +56,7 @@ export function StrategyNewPage() {
         <option value="zone_retest">zone_retest</option>
         <option value="structure_continuation">structure_continuation</option>
       </select>
-      <button className="rounded bg-accent text-primary px-4 py-2">{t("buttons.save")}</button>
+      <button className="rounded bg-foreground text-primary-fg px-4 py-2 min-h-11">{t("buttons.save")}</button>
     </form>
   );
 }
@@ -69,22 +69,25 @@ export function StrategyOptimizePage() {
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">{t("buttons.optimize")}</h1>
       <button
-        className="rounded bg-accent text-primary px-3 py-2"
+        className="rounded bg-foreground text-primary-fg px-3 py-2 min-h-11"
         onClick={async () => {
           if (!id) return;
           const r = await api.optimize(id, { candles: [], direction: "BUY", entry: 1, stop: 0.9, targets: [1.1, 1.2], spread: 0.0001, slippage: 0.0001, canonical_id: "EUR_USD" });
           setOut(r);
         }}
       >
-        Run
+        {t("buttons.run")}
       </button>
       {out && (
-        <pre className="text-sm bg-card p-3 rounded">
-          sample={out.sample_size} maxDD={out.max_dd ?? t("card.insufficient")} pf={out.profit_factor ?? t("card.insufficient")}
-          {"\n"}
-          {out.label}
-          {out.fragility_warning ? `\n${out.fragility_warning}` : ""}
-        </pre>
+        <dl className="text-sm bg-card p-3 rounded border border-line space-y-1">
+          <div>
+            {t("review.sample")}: {out.sample_size}
+          </div>
+          <div>maxDD={out.max_dd ?? t("card.insufficient")}</div>
+          <div>pf={out.profit_factor ?? t("card.insufficient")}</div>
+          <div>{out.label}</div>
+          {out.fragility_warning ? <div className="text-warning">{out.fragility_warning}</div> : null}
+        </dl>
       )}
     </div>
   );

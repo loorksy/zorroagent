@@ -152,34 +152,33 @@ export function Shell() {
           </div>
         )}
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="flex items-center justify-between border-b border-line px-3 h-14 gap-2">
+          <header className="flex items-center justify-between border-b border-line px-3 h-14 gap-2 overflow-hidden">
             <div className="flex items-center gap-2 min-w-0">
               <button className="md:hidden touch-target" onClick={() => setDrawer(true)} aria-label={t("nav.more")}>
                 <Menu size={18} />
               </button>
-              <button className="touch-target px-3 rounded-lg border border-line text-sm" onClick={() => openModal("symbol")}>
+              <button className="touch-target px-3 rounded-lg border border-line text-sm max-w-[7rem] sm:max-w-none truncate" onClick={() => openModal("symbol")}>
                 {symbol || t("ask.pickSymbol")}
               </button>
               {["1m", "5m", "15m", "1h", "4h", "1d"].map((tf) => (
                 <button
                   key={tf}
-                  className={`hidden sm:inline-flex px-2 min-h-10 rounded text-sm ${timeframe === tf ? "bg-muted text-foreground" : "text-muted-fg"}`}
+                  className={`hidden lg:inline-flex px-2 min-h-10 rounded text-sm ${timeframe === tf ? "bg-muted text-foreground" : "text-muted-fg"}`}
                   onClick={() => setTimeframe(tf)}
                 >
                   {tf}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 min-w-0 overflow-hidden">
               <span
-                className={`text-xs px-2 ${health === "connected" ? "text-buy" : "text-warning"}`}
+                className={`shrink-0 w-2.5 h-2.5 rounded-full ${health === "connected" ? "bg-buy" : "bg-warning"}`}
                 title={health}
                 data-testid="health-chip"
-              >
-                {health === "connected" ? t("health.connected") : t("health.degraded")}
-              </span>
+                aria-label={health === "connected" ? t("health.connected") : t("health.degraded")}
+              />
               <select
-                className="bg-muted rounded px-2 min-h-10 text-sm"
+                className="hidden md:block bg-muted rounded px-2 min-h-10 text-sm max-w-[14rem]"
                 value={modelId}
                 onChange={(e) => setModel(e.target.value)}
                 aria-label={t("ask.model")}

@@ -99,7 +99,7 @@ export function LoginPage() {
         {t("auth.password")}
         <input type="password" className="w-full bg-muted rounded px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("auth.passwordPlaceholder")} required />
       </label>
-      {err && <p className="text-red-400 text-sm">{err}</p>}
+      {err && <p className="text-sell text-sm">{err}</p>}
       <button className="w-full rounded liquid-metal py-2">{t("auth.signIn")}</button>
       <p className="text-xs text-muted-fg">{t("app.disclaimer")}</p>
     </form>

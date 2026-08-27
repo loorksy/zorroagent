@@ -39,7 +39,7 @@ graphify-out/cache/
 # OS
 .DS_Store
 
-# Test / local
+*.tsbuildinfo
 .redis-data/
 .postgres-data/
 coverage/

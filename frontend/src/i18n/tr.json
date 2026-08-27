@@ -90,7 +90,10 @@
     "drawIdea": "Çiz / tarif et",
     "library": "Kütüphaneden",
     "close": "Kapat",
-    "refresh": "Kataloğu yenile"
+    "refresh": "Kataloğu yenile",
+    "new": "Yeni",
+    "run": "Çalıştır",
+    "versions": "Sürümler"
   },
   "forms": {
     "required": "Bu alan zorunlu",
@@ -105,7 +108,23 @@
     "name": "Ad",
     "namePlaceholder": "Bot veya strateji adı",
     "token": "Jeton (şifreli saklanır)",
-    "accountId": "MetaApi hesap kimliği"
+    "accountId": "MetaApi hesap kimliği",
+    "canonicalId": "Kanonik enstrüman",
+    "executionSymbol": "Aracı kurum icra sembolü"
+  },
+  "account": {
+    "aliasHelp": "Analiz kanonik OANDA kimliklerini kullanır. Emirler eşlenen aracı sembolünü kullanır. Eşlenmeyen enstrümanlar analiz edilebilir ama asla icra edilmez.",
+    "demo": "demo",
+    "live": "canlı"
+  },
+  "bots": {
+    "promoteHint": "Canlıya yükseltmek için başarılı demo ve yazılmış kanonik sembol veya PIN gerekir."
+  },
+  "review": {
+    "sample": "Örneklem büyüklüğü"
+  },
+  "exposure": {
+    "totalR": "Toplam R"
   },
   "modals": {
     "execute": "İşlemi çalıştır",
@@ -122,7 +141,10 @@
     "cap": "Maruziyet tavanı (R)",
     "credentials": "Kimlik bilgileri",
     "disclaimer": "Uyarı",
-    "stopAll": "Tüm botları durdur"
+    "stopAll": "Tüm botları durdur",
+    "convertLock": "Seviyeler kilitlenir — yeni kural yok.",
+    "versionHint": "Canlı bot, siz etkinleştirene kadar mevcut sürümde kalır. Geri alma önceki sürümü getirir.",
+    "encryptedAtRest": "Beklemede şifrelenir. Ön yüzde saklanmaz."
   },
   "banner": {
     "unreliable": "Fiyat verisi güvenilir değil"
@@ -131,7 +153,7 @@
     "recs": "Henüz tavsiye yok.",
     "bots": "Bot yok. Kütüphane, kayıtlı tavsiye veya çizimden oluşturun.",
     "watch": "İzleme listesi boş.",
-    "ask": "Katalog enstrümanı sorun. Besteci altta kalır.",
+    "ask": "Katalog enstrümanı sorun. Yazma alanı altta kalır.",
     "chats": "Henüz sohbet yok."
   },
   "settings": {

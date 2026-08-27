@@ -17,3 +17,8 @@ def test_execution_table_is_not_recommendation_table():
     assert Recommendation.__tablename__ == "recommendations"
     assert Execution.__tablename__ != Recommendation.__tablename__
     assert execution_table_for("demo") != execution_table_for("live")
+
+
+def test_idempotency_key_is_unique_on_both_execution_tables():
+    assert Execution.__table__.c.idempotency_key.unique is True
+    assert DemoExecution.__table__.c.idempotency_key.unique is True

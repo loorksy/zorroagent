@@ -59,3 +59,14 @@ def test_promote_without_pin_or_symbol_is_403():
     assert code == 403
     ok2, code2, _ = promote_gate(True, "wrong", "XAU_USD", False)
     assert code2 == 403
+
+
+def test_inactive_code_version_blocks_orders():
+    v = check_bot_safety(_ok(code_version_active=False))
+    assert "code_version_active" in v.failed
+
+
+def test_duplicate_position_rule_honored():
+    v = check_bot_safety(_ok(duplicate_position=True))
+    assert v.ok is False
+    assert "duplicate_position" in v.failed

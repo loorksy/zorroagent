@@ -90,7 +90,10 @@
     "drawIdea": "Draw / describe idea",
     "library": "From library",
     "close": "Close",
-    "refresh": "Refresh catalog"
+    "refresh": "Refresh catalog",
+    "new": "New",
+    "run": "Run",
+    "versions": "Versions"
   },
   "forms": {
     "required": "This field is required",
@@ -105,7 +108,23 @@
     "name": "Name",
     "namePlaceholder": "Named bot or strategy",
     "token": "Token (stored encrypted)",
-    "accountId": "MetaApi account id"
+    "accountId": "MetaApi account id",
+    "canonicalId": "Canonical instrument",
+    "executionSymbol": "Broker execution symbol"
+  },
+  "account": {
+    "aliasHelp": "Analysis uses canonical OANDA ids. Orders use the mapped broker symbol. Unmapped instruments can be analyzed but never executed.",
+    "demo": "demo",
+    "live": "live"
+  },
+  "bots": {
+    "promoteHint": "Demo success plus typed canonical symbol or PIN required."
+  },
+  "review": {
+    "sample": "Sample size"
+  },
+  "exposure": {
+    "totalR": "Total R"
   },
   "modals": {
     "execute": "Execute trade",
@@ -122,7 +141,10 @@
     "cap": "Exposure cap (R)",
     "credentials": "Credentials",
     "disclaimer": "Disclaimer",
-    "stopAll": "Stop all bots"
+    "stopAll": "Stop all bots",
+    "convertLock": "Exact levels will be locked — no new rules.",
+    "versionHint": "Live bot keeps the current version until you activate. Rollback restores the previous version.",
+    "encryptedAtRest": "Encrypted at rest. Never stored in the frontend."
   },
   "banner": {
     "unreliable": "Price data unreliable"

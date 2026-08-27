@@ -10,15 +10,15 @@ export function TodayPage() {
   useEffect(() => {
     void api.recs().then(setRecs).catch(() => setRecs([]));
     void api.health().then((h) => {
-      if (h.feeds?.oanda?.status !== "connected") useDesk.getState().setBanner("Price data unreliable");
+      if (h.feeds?.oanda?.status !== "connected") useDesk.getState().setBanner("unreliable");
     }).catch(() => {});
   }, []);
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("nav.today")}</h1>
-      {recs.length === 0 && <p className="text-slate-400">{t("empty.recs")}</p>}
+      {recs.length === 0 && <p className="text-muted-fg">{t("empty.recs")}</p>}
       {recs.map((r) => (
-        <RecCard key={r.id} rec={r} />
+        <RecCard key={r.id} rec={r} surface="saved" />
       ))}
     </div>
   );

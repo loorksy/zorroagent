@@ -46,7 +46,7 @@ export function AskPage() {
   }
 
   const body = (
-    <div className="grid lg:grid-cols-[1fr_360px] gap-4 min-h-[calc(100vh-8rem)]">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] [dir=rtl]:lg:grid-cols-[360px_minmax(0,1fr)] gap-4 min-h-[calc(100vh-8rem)]">
       <section className="flex flex-col min-h-[60vh]">
         <div className="flex flex-wrap gap-2 items-center mb-3">
           <button

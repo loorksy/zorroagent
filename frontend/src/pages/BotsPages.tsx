@@ -13,7 +13,7 @@ export function BotsPage() {
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">{t("nav.bots")}</h1>
-      {rows.length === 0 && <p className="text-slate-400">{t("empty.bots")}</p>}
+      {rows.length === 0 && <p className="text-muted-fg">{t("empty.bots")}</p>}
       <ul>
         {rows.map((b) => (
           <li key={b.id}>
@@ -40,12 +40,12 @@ export function BotDetailPage() {
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">{bot.name}</h1>
-      <p className="text-sm text-slate-400">{bot.performance_note}</p>
+      <p className="text-sm text-muted-fg">{bot.performance_note}</p>
       <div className="flex flex-wrap gap-2">
-        <button className="rounded bg-muted px-3 py-2" onClick={() => id && api.demoBot(id)}>
+        <button className="rounded bg-muted px-3 py-2 min-h-11" onClick={() => id && api.demoBot(id)}>
           {t("buttons.startDemo")}
         </button>
-        <button className="rounded bg-accent text-primary px-3 py-2" onClick={() => nav(`/bots/${id}/live`)}>
+        <button className="rounded bg-foreground text-primary-fg px-3 py-2 min-h-11" onClick={() => nav(`/bots/${id}/live`)}>
           {t("buttons.promoteLive")}
         </button>
         <button className="rounded bg-muted px-3 py-2" onClick={() => open("version", bot)}>
@@ -63,7 +63,7 @@ export function BotLivePage() {
   useEffect(() => {
     if (id) open("promote", { id, account_id: "" });
   }, [id, open]);
-  return <p className="text-sm">{t("modals.promote")} — demo success + typed canonical symbol or PIN required.</p>;
+  return <p className="text-sm">{t("bots.promoteHint")}</p>;
 }
 
 export function DemoPage() {
@@ -90,7 +90,7 @@ export function MemoryPage() {
   return (
     <div>
       <h1 className="text-xl font-semibold">{t("nav.memory")}</h1>
-      <p className="text-sm text-slate-400">{d?.note}</p>
+      <p className="text-sm text-muted-fg">{d?.note}</p>
       <ul>
         {(d?.cases || []).map((c: any) => (
           <li key={c.id}>{c.canonical_id} {c.direction}</li>
@@ -109,7 +109,7 @@ export function ReviewPage() {
   return (
     <div>
       <h1 className="text-xl font-semibold">{t("nav.review")}</h1>
-      <p>sample {d?.sample_size ?? 0}</p>
+      <p>{t("review.sample")}: {d?.sample_size ?? 0}</p>
       <p>{d?.label === "Insufficient data" ? t("card.insufficient") : d?.label}</p>
       <p className="text-xs">{d?.disclaimer}</p>
     </div>

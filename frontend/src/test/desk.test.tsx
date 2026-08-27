@@ -1,12 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { RecCard, cardKind } from "../components/RecCard";
 import { AskPage } from "../pages/AskPage";
 import App from "../App";
+import { applyDir } from "../i18n";
 import "../i18n";
 import en from "../i18n/en.json";
 import tr from "../i18n/tr.json";
 import ar from "../i18n/ar.json";
+
+const here = dirname(fileURLToPath(import.meta.url));
 
 const rec = {
   id: "r1",
@@ -36,10 +42,49 @@ test("i18n keys exist in en tr ar", () => {
   expect(leafKeys(ar).sort()).toEqual(enKeys);
 });
 
+test("arabic applyDir sets html dir rtl and restores ltr", () => {
+  applyDir("ar");
+  expect(document.documentElement.dir).toBe("rtl");
+  expect(document.documentElement.lang).toBe("ar");
+  applyDir("en");
+  expect(document.documentElement.dir).toBe("ltr");
+});
+
+test("skip-link css does not use left:-999px (RTL overflow)", () => {
+  const css = readFileSync(join(here, "../index.css"), "utf8");
+  expect(css).not.toMatch(/left:\s*-999px/);
+  expect(css).toMatch(/clip-path:\s*inset\(50%\)/);
+  expect(css).toMatch(/overflow-x:\s*clip/);
+});
+
+test("symbol picker is reused across shell chart account watchlist", () => {
+  const files = [
+    "../components/Shell.tsx",
+    "../pages/ChartPage.tsx",
+    "../pages/AccountPage.tsx",
+    "../pages/WatchlistExposure.tsx",
+    "../components/Modals.tsx",
+  ].map((p) => readFileSync(join(here, p), "utf8"));
+  expect(files[0]).toMatch(/openModal\("symbol"\)/);
+  expect(files[1]).toMatch(/openModal\("symbol"\)/);
+  expect(files[2]).toMatch(/open\("symbol"\)/);
+  expect(files[3]).toMatch(/open\("symbol"\)/);
+  expect(files[4]).toMatch(/modal === "symbol"/);
+  expect(files[4]).toMatch(/data-testid="symbol-filter"/);
+});
+
+test("ask analysis flow has no raw ticker text input", () => {
+  const ask = readFileSync(join(here, "../pages/AskPage.tsx"), "utf8");
+  const analysis = readFileSync(join(here, "../components/Modals.tsx"), "utf8");
+  expect(ask).not.toMatch(/placeholder=.*ticker/i);
+  expect(analysis).toMatch(/ask\.pickSymbol/);
+  expect(analysis).toMatch(/ask\.noFreeText/);
+});
+
 test("routes listed in the brief have a page component", () => {
   render(<App />);
   // Guard redirects unauthenticated users to /login, which still mounts.
-  expect(screen.getByText(/Sign in|Email|Login/i)).toBeTruthy();
+  expect(screen.getAllByText(/Sign in|Email|Login/i).length).toBeGreaterThan(0);
 });
 
 test("agent log default collapsed", () => {

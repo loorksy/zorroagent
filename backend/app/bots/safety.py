@@ -24,6 +24,7 @@ class SafetyContext:
     exposure_cap_exceeded: bool
     account_bound: bool
     code_version_active: bool
+    duplicate_position: bool = False
 
 
 SAFETY_NAMES = [
@@ -43,6 +44,7 @@ SAFETY_NAMES = [
     "exposure_cap_exceeded",
     "account_bound",
     "code_version_active",
+    "duplicate_position",
 ]
 
 
@@ -84,6 +86,7 @@ def check_bot_safety(ctx: SafetyContext) -> SafetyVerdict:
         "exposure_cap_exceeded": not ctx.exposure_cap_exceeded,
         "account_bound": ctx.account_bound,
         "code_version_active": ctx.code_version_active,
+        "duplicate_position": not ctx.duplicate_position,
     }
     for name, passed in checks.items():
         if not passed:
