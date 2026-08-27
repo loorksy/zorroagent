@@ -5,7 +5,7 @@ Branch: `cursor/ai-trading-assistant-47d6`
 PR: https://github.com/loorksy/zorroagent/pull/1  
 Preferred base: `main`
 
-**Git SHA (this pack):** recorded at the bottom after commit. Parent of the evidence landing: `7c46e3bbb2f3cac8cc7f7861d01b6c8adc38f0a5`.
+**Git SHA (this pack):** `24ab4daffd518a410bfbce310c3d8750b71b0bae`
 
 Method: audit-as-untrusted. No live OANDA / Anthropic / MetaApi / Telegram secrets in this environment (no `.env`; `.env.example` only). Live labs that need those keys are **BLOCKED**, not faked.
 
