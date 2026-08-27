@@ -67,6 +67,13 @@ class AnalyzeIn(BaseModel):
             raise ValueError("WAIT is not a valid analytical outcome")
         return v
 
+    @field_validator("take_profits")
+    @classmethod
+    def need_tp2(cls, v: list[float]) -> list[float]:
+        if len(v) < 2:
+            raise ValueError("Missing TP2")
+        return v
+
 
 class ExecuteIn(BaseModel):
     source: Literal["recommendation", "bot"]
@@ -75,6 +82,8 @@ class ExecuteIn(BaseModel):
     account_id: str
     lots: float
     confirmation: str  # typed canonical symbol or PIN
+    client_key: str | None = None
+    is_demo: bool = True
 
 
 class BotCreateIn(BaseModel):

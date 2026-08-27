@@ -157,13 +157,13 @@ class RecommendationGate(Base):
     recommendation: Mapped[Recommendation] = relationship(back_populates="gates")
 
 
-class Execution(Base):
-    """Broker fills. NEVER written into the recommendation record."""
+class DemoExecution(Base):
+    """Demo fills. Separate table from live executions."""
 
-    __tablename__ = "executions"
+    __tablename__ = "demo_executions"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     idempotency_key: Mapped[str] = mapped_column(String(128), unique=True)
-    source: Mapped[str] = mapped_column(String(16))  # recommendation | bot
+    source: Mapped[str] = mapped_column(String(16))
     source_id: Mapped[str] = mapped_column(String(36))
     source_name: Mapped[str] = mapped_column(String(128))
     account_id: Mapped[str] = mapped_column(String(36))
@@ -176,6 +176,31 @@ class Execution(Base):
     broker_order_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     fill_price: Mapped[float | None] = mapped_column(Float, nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="pending")
+    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Execution(Base):
+    """Live broker fills. NEVER written into the recommendation record."""
+
+    __tablename__ = "executions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    idempotency_key: Mapped[str] = mapped_column(String(128), unique=True)
+    source: Mapped[str] = mapped_column(String(16))
+    source_id: Mapped[str] = mapped_column(String(36))
+    source_name: Mapped[str] = mapped_column(String(128))
+    account_id: Mapped[str] = mapped_column(String(36))
+    canonical_id: Mapped[str] = mapped_column(String(64))
+    execution_symbol: Mapped[str] = mapped_column(String(64))
+    direction: Mapped[str] = mapped_column(String(8))
+    lots: Mapped[float] = mapped_column(Float)
+    sl: Mapped[float] = mapped_column(Float)
+    tp: Mapped[float | None] = mapped_column(Float, nullable=True)
+    broker_order_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    fill_price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -215,6 +240,8 @@ class Bot(Base):
     model_id: Mapped[str] = mapped_column(String(64), default="claude-fable-5")
     demo_success: Mapped[bool] = mapped_column(Boolean, default=False)
     kill_switched: Mapped[bool] = mapped_column(Boolean, default=False)
+    previous_version_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    last_order_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     versions: Mapped[list["BotVersion"]] = relationship(back_populates="bot")
 

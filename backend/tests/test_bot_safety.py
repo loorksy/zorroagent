@@ -1,4 +1,4 @@
-from app.bots.safety import SafetyContext, check_bot_safety
+from app.bots.safety import SafetyContext, check_bot_safety, promote_gate, promote_gate
 
 
 def _ok(**over) -> SafetyContext:
@@ -45,3 +45,17 @@ def test_veto_never_flips_just_blocks():
 def test_unmapped_alias_blocks_bot_order():
     v = check_bot_safety(_ok(alias_mapped=False))
     assert "alias_mapped" in v.failed
+
+
+def test_promote_without_demo_is_403():
+    ok, code, _ = promote_gate(False, "XAU_USD", "XAU_USD", False)
+    assert ok is False
+    assert code == 403
+
+
+def test_promote_without_pin_or_symbol_is_403():
+    ok, code, _ = promote_gate(True, "", "XAU_USD", False)
+    assert ok is False
+    assert code == 403
+    ok2, code2, _ = promote_gate(True, "wrong", "XAU_USD", False)
+    assert code2 == 403

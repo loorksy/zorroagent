@@ -7,9 +7,9 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.bots.kill import apply_kill_switch
 from app.config import get_settings
-from app.db.models import Bot, KillSwitch, Recommendation
-from app.enums import BotStatus
+from app.db.models import Bot, Recommendation
 
 
 HELP = (
@@ -39,26 +39,14 @@ async def handle_telegram_update(payload: dict[str, Any], db: AsyncSession) -> d
     if cmd in {"/start", "/help"}:
         return {"ok": True, "reply": HELP}
     if cmd == "/stopall":
-        row = await db.get(KillSwitch, 1)
-        if row is None:
-            row = KillSwitch(id=1)
-            db.add(row)
-            await db.flush()
-        row.engaged = True
-        row.reason = "telegram:/stopall"
-        bots = (await db.scalars(select(Bot))).all()
-        for b in bots:
-            b.kill_switched = True
-            b.status = BotStatus.KILLED.value
-        await db.commit()
+        await apply_kill_switch(db, engaged=True, reason="telegram:/stopall")
         return {"ok": True, "reply": "Kill switch ENGAGED. All bots stopped. Overrides everything."}
     if cmd == "/killoff":
-        row = await db.get(KillSwitch, 1)
-        if row:
-            row.engaged = False
-            row.reason = ""
-        await db.commit()
+        await apply_kill_switch(db, engaged=False, reason="telegram:/killoff")
         return {"ok": True, "reply": "Kill switch disengaged."}
+    if cmd == "/link":
+        code = f"ZORRO-{chat_id[-6:]}" if chat_id else "ZORRO-LOCAL"
+        return {"ok": True, "reply": f"Linking code: {code}. Enter it once on Settings → Telegram."}
     if cmd == "/today":
         recs = (await db.scalars(select(Recommendation).order_by(Recommendation.created_at.desc()).limit(10))).all()
         lines = [f"{r.direction} {r.canonical_id} {r.plan_type} ({r.execution_status})" for r in recs] or ["No cards today."]
@@ -75,11 +63,26 @@ async def handle_telegram_update(payload: dict[str, Any], db: AsyncSession) -> d
             "ok": True,
             "reply": (
                 f"{rec.direction} {rec.canonical_id}\n"
-                f"plan={rec.plan_type} status={rec.execution_status}\n"
+                f"bias={rec.analytical_bias} plan={rec.plan_type} status={rec.execution_status}\n"
                 f"entry {rec.preferred_entry} sl {rec.stop_loss} tp {rec.take_profits}\n"
-                f"fill={rec.fill_rule}\n"
+                f"fill={rec.fill_rule} next={rec.next_action}\n"
+                f"similar={rec.similar_past_cases}\n"
                 f"model={rec.model_id}"
             ),
+            "card": {
+                "direction": rec.direction,
+                "canonical_id": rec.canonical_id,
+                "analytical_bias": rec.analytical_bias,
+                "plan_type": rec.plan_type,
+                "execution_status": rec.execution_status,
+                "preferred_entry": rec.preferred_entry,
+                "stop_loss": rec.stop_loss,
+                "take_profits": rec.take_profits,
+                "fill_rule": rec.fill_rule,
+                "next_action": rec.next_action,
+                "similar_past_cases": rec.similar_past_cases,
+                "model_id": rec.model_id,
+            },
         }
     if cmd == "/ask":
         from app.agent.runtime import run_claude

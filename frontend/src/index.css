@@ -2,24 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
+/* AiChart-family tokens: calm neutrals. Semantic color only for trading meaning. */
 :root {
-  --color-primary: #0f172a;
-  --color-accent: #22c55e;
-  --color-background: #020617;
-  --color-card: #0e1223;
-  --color-border: #334155;
+  --radius: 0.625rem;
+  --radius-lg: 0.875rem;
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --muted: #f2f2f2;
+  --muted-foreground: #404040;
+  --border: #e5e5e5;
+  --ring: #000000;
+  --sidebar: #ffffff;
+  --sidebar-active-bg: #f2f2f2;
+  --buy: #15803d;
+  --sell: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+  --destructive: #dc2626;
+  --chat-input: #ffffff;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #f5f5f5;
+  --card: #0a0a0a;
+  --primary: #fafafa;
+  --primary-foreground: #000000;
+  --muted: #111111;
+  --muted-foreground: #a3a3a3;
+  --border: #1f1f1f;
+  --ring: #a3a3a3;
+  --sidebar: #000000;
+  --sidebar-active-bg: #141414;
+  --buy: #22c55e;
+  --sell: #ef4444;
+  --warning: #f59e0b;
+  --info: #38bdf8;
+  --destructive: #ef4444;
+  --chat-input: #0a0a0a;
 }
 
 html, body, #root { height: 100%; }
-body { font-family: Inter, system-ui, sans-serif; }
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, Cairo, system-ui, sans-serif;
+  overscroll-behavior-y: none;
+}
 
 [dir="rtl"] .rtl-flip { transform: scaleX(-1); }
 
 button, a, [role="button"] { cursor: pointer; }
-:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
 
 .touch-target { min-height: 44px; min-width: 44px; }
+@media (min-width: 1024px) {
+  .touch-target { min-height: 40px; min-width: 40px; }
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 100;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.5rem 1rem;
+}
+.skip-link:focus { left: 0.5rem; top: 0.5rem; }
+
+.active-marker {
+  position: absolute;
+  inset-block: 0.5rem;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--foreground);
+}
+
+.liquid-metal {
+  position: relative;
+  isolation: isolate;
+  border-radius: 999px;
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--foreground) 72%, var(--background)),
+    color-mix(in srgb, var(--foreground) 22%, var(--background)) 38%,
+    color-mix(in srgb, var(--foreground) 58%, var(--background)) 68%,
+    color-mix(in srgb, var(--foreground) 18%, var(--background))
+  );
+}
+
+.composer-sheet {
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, var(--border));
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  box-shadow: 0 22px 48px color-mix(in srgb, var(--background) 50%, transparent);
+}
+
+.banner-unreliable {
+  background: var(--destructive);
+  color: #fff;
+}

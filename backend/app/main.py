@@ -32,8 +32,9 @@ from app.api.schemas import (
     SettingsIn,
     WatchlistIn,
 )
-from app.backtest.engine import CostModel, run_backtest
-from app.bots.safety import SafetyContext, check_bot_safety
+from app.backtest.engine import CostModel, CostModelRequired, IncrementState, incremental_backtest, oos_fragility_tag, run_backtest
+from app.bots.kill import apply_kill_switch
+from app.bots.safety import SafetyContext, check_bot_safety, promote_gate
 from app.config import get_settings
 from app.db.models import (
     AgentRun,
@@ -44,6 +45,7 @@ from app.db.models import (
     BotVersion,
     BrokerAccount,
     Conversation,
+    DemoExecution,
     EncryptedSecret,
     Execution,
     FeedHealth,
@@ -60,7 +62,8 @@ from app.db.models import (
     WatchlistItem,
 )
 from app.db.session import create_all, get_db
-from app.domain.fill_rules import ActivationRule
+from app.domain.fill_rules import ActivationRule, EntryPlan
+from app.domain.schema import validate_recommendation_schema
 from app.enums import (
     AnalysisTier,
     MODEL_CATALOG,
@@ -175,7 +178,23 @@ async def health():
             "metaapi": {"status": m_s.value, "detail": m_d},
             "anthropic": "connected" if settings.anthropic_api_key else "disconnected",
         },
-        "mcp": False,
+    }
+
+
+@app.get("/healthz")
+async def healthz():
+    """Independent feed/db/redis status. No mcp key."""
+    body = await health()
+    feeds = body["feeds"]
+    oanda = feeds["oanda"]["status"] if isinstance(feeds["oanda"], dict) else feeds["oanda"]
+    twelve = feeds["twelve_data"]["status"] if isinstance(feeds["twelve_data"], dict) else feeds["twelve_data"]
+    meta = feeds["metaapi"]["status"] if isinstance(feeds["metaapi"], dict) else feeds["metaapi"]
+    return {
+        "db": feeds["postgres"],
+        "redis": feeds["redis"],
+        "oanda": oanda,
+        "twelve": twelve,
+        "metaapi": meta,
     }
 
 
@@ -371,6 +390,8 @@ async def chat(body: ChatIn, request: Request, db: AsyncSession = Depends(get_db
         "model_id": conv.model_id,
         "reply": text,
         "recommendation": None,
+        "execute_tool": False,
+        "tools": ["list_instruments", "get_candles", "get_price", "get_news", "capture_chart_images"],
         "note": "Execution is never started from chat. Name a saved recommendation to execute.",
         "disclaimer": DISCLAIMER,
     }
@@ -445,6 +466,23 @@ async def analyze(body: AnalyzeIn, db: AsyncSession = Depends(get_db), op: Opera
             zone_low=body.activation_rule.get("zone_low"),
             zone_high=body.activation_rule.get("zone_high"),
         )
+    schema_plan = EntryPlan(
+        direction=body.direction,
+        fill_rule=body.fill_rule,
+        preferred_entry=body.preferred_entry,
+        entry_zone_low=body.entry_zone_low,
+        entry_zone_high=body.entry_zone_high,
+        stop_loss=body.stop_loss,
+        take_profits=body.take_profits,
+        activation_rule=rule,
+        plan_type=body.plan_type,
+        atr=atr,
+    )
+    schema_problems = validate_recommendation_schema(
+        schema_plan, activation_condition=body.activation_condition, analytical_bias=body.direction.value
+    )
+    if schema_problems:
+        raise HTTPException(400, "; ".join(p.message for p in schema_problems))
     spread = None
     typical = None
     if oanda_px:
@@ -500,6 +538,12 @@ async def analyze(body: AnalyzeIn, db: AsyncSession = Depends(get_db), op: Opera
         operator_defaults={"quick_model": op.quick_model, "deep_model": op.deep_model},
     )
     out = publish(inp)
+    elapsed_ms = int((time.time() - inp.now_ts) * 1000)
+    import logging
+
+    logging.getLogger("zorro.latency").info(
+        "analyze_latency", extra={"tier": body.tier.value, "elapsed_ms": elapsed_ms, "canonical_id": body.canonical_id}
+    )
     run = AgentRun(id=out.agent_run_id, model_id=out.model_id, tier=body.tier.value, roles={"order": ["technical_analyst", "debate_moderator", "trader"]})
     db.add(run)
     if not out.published:
@@ -662,29 +706,36 @@ async def execute(body: ExecuteIn, db: AsyncSession = Depends(get_db), op: Opera
     ks = await db.get(KillSwitch, 1)
     if ks and ks.engaged:
         raise HTTPException(423, "Kill switch engaged")
+    if body.source != "recommendation":
+        raise HTTPException(400, "Bot-originated orders go through the worker after rationale")
+    rec = await db.get(Recommendation, body.source_id)
+    if rec is None:
+        raise HTTPException(400, "Must name an existing saved recommendation")
     account = await db.get(BrokerAccount, body.account_id)
     if not account:
         raise HTTPException(400, "Unknown account")
-    if body.source == "recommendation":
-        rec = await db.get(Recommendation, body.source_id)
-        if not rec or rec.name != body.source_name and rec.id != body.source_id:
-            raise HTTPException(400, "Must name an existing saved recommendation")
-        canonical = rec.canonical_id
-        direction = Direction(rec.direction)
-        sl = rec.stop_loss
-        tps = rec.take_profits or []
-    else:
-        bot = await db.get(Bot, body.source_id)
-        if not bot:
-            raise HTTPException(400, "Must name an existing bot")
-        canonical = bot.canonical_id
-        direction = Direction.BUY
-        sl = 0.0
-        tps = []
-        raise HTTPException(400, "Bot-originated orders go through the worker after rationale")
+    canonical = rec.canonical_id
+    direction = Direction(rec.direction)
+    sl = rec.stop_loss
+    tps = rec.take_profits or []
     pin_ok = bool(op.pin_hash and verify_password(body.confirmation, op.pin_hash))
     if body.confirmation != canonical and not pin_ok:
         raise HTTPException(400, "Type the canonical symbol or PIN to confirm")
+    if body.lots <= 0:
+        raise HTTPException(400, "Lot size is asked once and must be positive")
+    if sl is None or sl <= 0:
+        raise HTTPException(400, "SL always attached")
+    key = body.client_key or str(uuid.uuid4())
+    table = DemoExecution if body.is_demo or account.is_demo else Execution
+    existing = await db.scalar(select(table).where(table.idempotency_key == key))
+    if existing:
+        return {
+            "ok": True,
+            "execution_id": existing.id,
+            "idempotent": True,
+            "table": table.__tablename__,
+            "note": "Same client key → one broker order.",
+        }
     aliases = {a.canonical_id: a.execution_symbol for a in (await db.scalars(select(AliasMap).where(AliasMap.account_id == account.id))).all()}
     tested = {a.canonical_id for a in (await db.scalars(select(AliasMap).where(AliasMap.account_id == account.id, AliasMap.last_test_ok.is_(True)))).all()}
     alias = resolve_alias(canonical, aliases, tested)
@@ -697,7 +748,7 @@ async def execute(body: ExecuteIn, db: AsyncSession = Depends(get_db), op: Opera
         token,
         alias,
         OrderRequest(
-            idempotency_key=str(uuid.uuid4()),
+            idempotency_key=key,
             execution_symbol=alias.execution_symbol or "",
             direction=direction,
             lots=body.lots,
@@ -706,8 +757,8 @@ async def execute(body: ExecuteIn, db: AsyncSession = Depends(get_db), op: Opera
             comment=body.source_name[:30],
         ),
     )
-    ex = Execution(
-        idempotency_key=str(uuid.uuid4()),
+    ex = table(
+        idempotency_key=key,
         source=body.source,
         source_id=body.source_id,
         source_name=body.source_name,
@@ -724,7 +775,13 @@ async def execute(body: ExecuteIn, db: AsyncSession = Depends(get_db), op: Opera
     )
     db.add(ex)
     await db.commit()
-    return {"ok": result.ok, "execution_id": ex.id, "error": result.error, "note": "Fill is stored in executions, never on the recommendation."}
+    return {
+        "ok": result.ok,
+        "execution_id": ex.id,
+        "table": table.__tablename__,
+        "error": result.error,
+        "note": "Fill is stored in executions/demo_executions, never on the recommendation.",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -861,16 +918,26 @@ async def strategy_versions(sid: str, db: AsyncSession = Depends(get_db), _: Ope
 
 @app.post("/api/strategies/{sid}/optimize")
 async def optimize(sid: str, payload: dict[str, Any], db: AsyncSession = Depends(get_db), _: Operator = Depends(current_operator)):
+    if payload.get("spread") is None or payload.get("slippage") is None:
+        raise HTTPException(400, "Run without cost model → rejected.")
     candles = payload.get("candles") or []
-    result = run_backtest(
-        candles,
-        payload.get("direction") or "BUY",
-        float(payload.get("entry") or 0),
-        float(payload.get("stop") or 0),
-        payload.get("targets") or [0, 0],
-        CostModel(spread=float(payload.get("spread") or 0), slippage=float(payload.get("slippage") or 0)),
-        settings.sample_floor,
-    )
+    try:
+        result = run_backtest(
+            candles,
+            payload.get("direction") or "BUY",
+            float(payload.get("entry") or 0),
+            float(payload.get("stop") or 0),
+            payload.get("targets") or [0, 0],
+            CostModel(spread=float(payload["spread"]), slippage=float(payload["slippage"])),
+            settings.sample_floor,
+            oos_profit_factor=payload.get("oos_profit_factor"),
+        )
+    except CostModelRequired as exc:
+        raise HTTPException(400, str(exc)) from exc
+    if payload.get("oos_profit_factor") is not None:
+        tag = oos_fragility_tag(result.profit_factor, float(payload["oos_profit_factor"]))
+        if tag:
+            result.fragility_warning = tag
     run = BacktestRun(
         strategy_id=sid,
         canonical_id=payload.get("canonical_id") or "",
@@ -894,6 +961,35 @@ async def optimize(sid: str, payload: dict[str, Any], db: AsyncSession = Depends
         "fragility_warning": result.fragility_warning,
         "equity_curve": result.equity_curve,
         "note": "Never displayed as monthly return %.",
+    }
+
+
+@app.post("/api/backtest/increment")
+async def backtest_increment(payload: dict[str, Any], _: Operator = Depends(current_operator)):
+    """Nightly incremental job. Does not full-replay from zero."""
+    if payload.get("spread") is None or payload.get("slippage") is None:
+        raise HTTPException(400, "Run without cost model → rejected.")
+    state = IncrementState(watermark=int(payload.get("watermark") or 0))
+    candles = payload.get("candles") or []
+    result, new_state = incremental_backtest(
+        state,
+        candles,
+        payload.get("direction") or "BUY",
+        float(payload.get("entry") or 0),
+        float(payload.get("stop") or 0),
+        payload.get("targets") or [0, 0],
+        CostModel(spread=float(payload["spread"]), slippage=float(payload["slippage"])),
+        int(payload.get("sample_floor") or settings.sample_floor),
+    )
+    return {
+        "watermark": new_state.watermark,
+        "previous_watermark": state.watermark,
+        "replayed_from_zero": False,
+        "candles_processed": max(0, new_state.watermark - state.watermark),
+        "sample_size": result.sample_size,
+        "label": result.label,
+        "insufficient_data": result.insufficient_data,
+        "note": "Incremental. Never a full replay from zero.",
     }
 
 
@@ -967,11 +1063,9 @@ async def promote_live(bid: str, body: PromoteLiveIn, db: AsyncSession = Depends
     b = await db.get(Bot, bid)
     if not b:
         raise HTTPException(404)
-    if not b.demo_success:
-        raise HTTPException(400, "Mandatory demo success before live")
-    pin_ok = bool(op.pin_hash and verify_password(body.confirmation, op.pin_hash))
-    if body.confirmation != b.canonical_id and not pin_ok:
-        raise HTTPException(400, "Type the canonical symbol or PIN")
+    allowed, code, reason = promote_gate(b.demo_success, body.confirmation, b.canonical_id, bool(op.pin_hash and verify_password(body.confirmation, op.pin_hash)))
+    if not allowed:
+        raise HTTPException(code, reason)
     b.account_id = body.account_id
     b.mode = "live"
     b.status = BotStatus.LIVE_STOPPED.value
@@ -979,12 +1073,32 @@ async def promote_live(bid: str, body: PromoteLiveIn, db: AsyncSession = Depends
     return {"ok": True, "status": b.status}
 
 
+@app.post("/api/bots/{bid}/activate")
+async def activate_version(bid: str, payload: dict[str, Any], db: AsyncSession = Depends(get_db), _: Operator = Depends(current_operator)):
+    """Live bot stays on the old version until this explicit activate."""
+    b = await db.get(Bot, bid)
+    if not b:
+        raise HTTPException(404)
+    vid = payload.get("version_id")
+    ver = await db.get(BotVersion, vid) if vid else None
+    if not ver or ver.bot_id != bid:
+        raise HTTPException(400, "Unknown version")
+    b.previous_version_id = b.active_version_id
+    b.active_version_id = ver.id
+    await db.commit()
+    return {"ok": True, "active_version_id": b.active_version_id, "previous_version_id": b.previous_version_id}
+
+
 @app.post("/api/bots/{bid}/rollback")
 async def rollback(bid: str, payload: dict[str, Any], db: AsyncSession = Depends(get_db), _: Operator = Depends(current_operator)):
     b = await db.get(Bot, bid)
     if not b:
         raise HTTPException(404)
-    b.active_version_id = payload.get("version_id")
+    restore = payload.get("version_id") or b.previous_version_id
+    if not restore:
+        raise HTTPException(400, "No previous version to restore")
+    b.previous_version_id = b.active_version_id
+    b.active_version_id = restore
     await db.commit()
     return {"ok": True, "active_version_id": b.active_version_id}
 
@@ -1007,20 +1121,7 @@ async def bot_rationale(bid: str, payload: dict[str, Any], db: AsyncSession = De
 
 @app.post("/api/kill-switch")
 async def kill_switch(body: KillSwitchIn, db: AsyncSession = Depends(get_db), _: Operator = Depends(current_operator)):
-    row = await db.get(KillSwitch, 1)
-    if row is None:
-        row = KillSwitch(id=1)
-        db.add(row)
-        await db.flush()
-    row.engaged = body.engaged
-    row.reason = body.reason
-    row.engaged_at = datetime.now(timezone.utc) if body.engaged else None
-    if body.engaged:
-        bots = (await db.scalars(select(Bot))).all()
-        for b in bots:
-            b.kill_switched = True
-            b.status = BotStatus.KILLED.value
-    await db.commit()
+    row = await apply_kill_switch(db, engaged=body.engaged, reason=body.reason or "web")
     return {"engaged": row.engaged, "reason": row.reason}
 
 
@@ -1114,7 +1215,7 @@ async def routes_doc():
             "/history": {"api": ["/api/history"]},
             "/login": {"api": ["POST /api/auth/login"], "auth": False},
         },
-        "mcp": False,
+        "mcp": False,  # exclusion documented: there is no MCP server
     }
 
 

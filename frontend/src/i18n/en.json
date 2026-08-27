@@ -4,6 +4,9 @@
     "tagline": "Chat-first analyst",
     "disclaimer": "Personal analysis, not fund management. Trading involves risk of loss. No monthly return is promised."
   },
+  "a11y": {
+    "skip": "Skip to main content"
+  },
   "nav": {
     "ask": "Ask",
     "today": "Scan Today",
@@ -38,9 +41,11 @@
     "quick": "Quick Scan",
     "deep": "Deep Analysis",
     "agentLog": "Agent Log",
+    "agentLogBody": "Hidden by default. Full transcript lives on the agent run.",
     "pickSymbol": "Select instrument",
     "model": "Model",
     "newChat": "New conversation",
+    "conversations": "Conversations",
     "noFreeText": "Instruments are chosen from the OANDA catalog. Free-text symbols are not allowed."
   },
   "models": {
@@ -125,6 +130,30 @@
   "empty": {
     "recs": "No recommendations yet.",
     "bots": "No bots yet. Create from library, a saved recommendation, or a drawn idea.",
-    "watch": "Watchlist is empty. Pick from the catalog."
+    "watch": "Watchlist is empty. Pick from the catalog.",
+    "ask": "Ask about a catalog instrument. The composer stays at the bottom.",
+    "chats": "No conversations yet."
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme",
+    "quickDefault": "Quick Scan default",
+    "deepDefault": "Deep Analysis default",
+    "dark": "Dark",
+    "light": "Light",
+    "telegram": "Telegram linking code"
+  },
+  "health": {
+    "connected": "Connected",
+    "degraded": "Degraded"
+  },
+  "chart": {
+    "clear": "Clear drawings"
+  },
+  "build": {
+    "libraryHint": "Versioned Python strategy templates.",
+    "convertHint": "Lock exact levels — no new rules.",
+    "drawHint": "Drawings + prose become a draft.",
+    "demoNote": "Mandatory demo before live. Promote-to-live lives on the bot page."
   }
 }

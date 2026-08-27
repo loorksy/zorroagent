@@ -8,7 +8,7 @@ def test_health_never_fakes_live_prices():
     r = client.get("/health")
     assert r.status_code == 200
     body = r.json()
-    assert body["mcp"] is False
+    assert "mcp" not in body
     assert "personal analysis" in body["disclaimer"].lower()
     assert body["feeds"]["oanda"]["status"] in {"connected", "disconnected", "degraded", "diverged"}
 

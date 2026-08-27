@@ -18,17 +18,18 @@ export function RecommendationsPage() {
           <RecCard rec={r} />
         </Link>
       ))}
-      {rows.length === 0 && <p className="text-slate-400">{t("empty.recs")}</p>}
+      {rows.length === 0 && <p className="text-muted-fg">{t("empty.recs")}</p>}
     </div>
   );
 }
 
 export function RecommendationDetailPage() {
   const { id } = useParams();
+  const { t } = useTranslation();
   const [rec, setRec] = useState<any>(null);
   useEffect(() => {
     if (id) void api.rec(id).then(setRec).catch(() => setRec(null));
   }, [id]);
-  if (!rec) return <p>Not available</p>;
-  return <RecCard rec={rec} />;
+  if (!rec) return <p>{t("card.notAvailable")}</p>;
+  return <RecCard rec={rec} surface="saved" />;
 }

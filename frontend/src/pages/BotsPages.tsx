@@ -36,7 +36,7 @@ export function BotDetailPage() {
   useEffect(() => {
     if (id) void api.bot(id).then(setBot).catch(() => setBot(null));
   }, [id]);
-  if (!bot) return <p>Not available</p>;
+  if (!bot) return <p>{t("card.notAvailable")}</p>;
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">{bot.name}</h1>

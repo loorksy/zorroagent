@@ -56,16 +56,46 @@ def profit_factor(rs: list[float]) -> float | None:
     return gains / losses
 
 
+class CostModelRequired(ValueError):
+    """Raised when a backtest is requested without a cost model."""
+
+
+def oos_fragility_tag(in_sample_pf: float | None, oos_pf: float | None) -> str | None:
+    """Optimizer tag when out-of-sample collapses versus in-sample."""
+    if in_sample_pf is None or oos_pf is None:
+        return None
+    if in_sample_pf > 0 and oos_pf < in_sample_pf * 0.5:
+        return "Fragile"
+    return None
+
+
+@dataclass
+class IncrementState:
+    watermark: int = 0
+    trades: list[SimulatedTrade] = field(default_factory=list)
+    equity_curve: list[float] = field(default_factory=lambda: [0.0])
+
+    def as_dict(self) -> dict:
+        return {
+            "watermark": self.watermark,
+            "trade_count": len(self.trades),
+            "equity_last": self.equity_curve[-1] if self.equity_curve else 0.0,
+        }
+
+
 def run_backtest(
     candles: list[dict],
     direction: str,
     entry: float,
     stop: float,
     targets: list[float],
-    cost: CostModel,
+    cost: CostModel | None,
     sample_floor: int = 30,
+    oos_profit_factor: float | None = None,
 ) -> BacktestResult:
     """Simple level-touch simulator. Indicators NEVER come from Twelve Data."""
+    if cost is None:
+        raise CostModelRequired("Run without cost model → rejected.")
     trades: list[SimulatedTrade] = []
     in_pos = False
     fill = None
@@ -110,6 +140,9 @@ def run_backtest(
     warning = None
     if not insufficient and pf is not None and pf > 5:
         warning = "Optimizer fragility warning: profit factor is unusually high; treat as curve-fit risk, not a promise."
+    fragile = oos_fragility_tag(None if insufficient else pf, oos_profit_factor)
+    if fragile:
+        warning = f"{warning + ' ' if warning else ''}{fragile}"
     return BacktestResult(
         sample_size=len(trades),
         trades=trades,
@@ -120,3 +153,49 @@ def run_backtest(
         label="Insufficient data" if insufficient else "ok",
         fragility_warning=warning,
     )
+
+
+def incremental_backtest(
+    state: IncrementState,
+    new_candles: list[dict],
+    direction: str,
+    entry: float,
+    stop: float,
+    targets: list[float],
+    cost: CostModel,
+    sample_floor: int = 30,
+) -> tuple[BacktestResult, IncrementState]:
+    """Nightly job: process only candles after the watermark. Never full-replay from zero."""
+    if cost is None:
+        raise CostModelRequired("Run without cost model → rejected.")
+    sliced = new_candles[state.watermark :]
+    if not sliced:
+        result = BacktestResult(
+            sample_size=len(state.trades),
+            trades=list(state.trades),
+            equity_curve=list(state.equity_curve),
+            max_dd=max_drawdown(state.equity_curve) if len(state.equity_curve) > 1 else None,
+            profit_factor=profit_factor([t.r for t in state.trades]) if state.trades else None,
+            insufficient_data=len(state.trades) < sample_floor,
+            label="Insufficient data" if len(state.trades) < sample_floor else "ok",
+        )
+        return result, state
+    piece = run_backtest(sliced, direction, entry, stop, targets, cost, sample_floor=1)
+    merged_trades = list(state.trades) + list(piece.trades)
+    equity = list(state.equity_curve)
+    for t in piece.trades:
+        equity.append(equity[-1] + t.r)
+    new_state = IncrementState(watermark=len(new_candles), trades=merged_trades, equity_curve=equity)
+    rs = [t.r for t in merged_trades]
+    insufficient = len(merged_trades) < sample_floor
+    result = BacktestResult(
+        sample_size=len(merged_trades),
+        trades=merged_trades,
+        equity_curve=equity,
+        max_dd=max_drawdown(equity) if len(equity) > 1 else None,
+        profit_factor=None if insufficient else profit_factor(rs),
+        insufficient_data=insufficient,
+        label="Insufficient data" if insufficient else "ok",
+        fragility_warning=piece.fragility_warning,
+    )
+    return result, new_state

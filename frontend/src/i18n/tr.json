@@ -4,6 +4,9 @@
     "tagline": "Sohbet öncelikli analist",
     "disclaimer": "Kişisel analiz, fon yönetimi değildir. İşlem kayıp riski taşır. Aylık getiri vaadi yoktur."
   },
+  "a11y": {
+    "skip": "Ana içeriğe geç"
+  },
   "nav": {
     "ask": "Sor",
     "today": "Bugünü Tara",
@@ -38,9 +41,11 @@
     "quick": "Hızlı Tarama",
     "deep": "Derin Analiz",
     "agentLog": "Ajan günlüğü",
+    "agentLogBody": "Varsayılan olarak gizli. Tam transkript ajan koşusunda.",
     "pickSymbol": "Enstrüman seç",
     "model": "Model",
     "newChat": "Yeni sohbet",
+    "conversations": "Sohbetler",
     "noFreeText": "Enstrümanlar OANDA kataloğundan seçilir. Serbest metin sembol yok."
   },
   "models": {
@@ -59,8 +64,8 @@
     "fill": "Doldurma kuralı",
     "next": "Sonraki adım",
     "similar": "Benzer geçmiş vakalar",
-    "insufficient": "Insufficient data",
-    "notAvailable": "Not available",
+    "insufficient": "Yetersiz veri",
+    "notAvailable": "Mevcut değil",
     "refused": "Platform yayımlamayı reddetti",
     "nonTradeable": "İşlem yapılamaz Hızlı Tarama"
   },
@@ -120,11 +125,35 @@
     "stopAll": "Tüm botları durdur"
   },
   "banner": {
-    "unreliable": "Price data unreliable"
+    "unreliable": "Fiyat verisi güvenilir değil"
   },
   "empty": {
     "recs": "Henüz tavsiye yok.",
     "bots": "Bot yok. Kütüphane, kayıtlı tavsiye veya çizimden oluşturun.",
-    "watch": "İzleme listesi boş."
+    "watch": "İzleme listesi boş.",
+    "ask": "Katalog enstrümanı sorun. Besteci altta kalır.",
+    "chats": "Henüz sohbet yok."
+  },
+  "settings": {
+    "language": "Dil",
+    "theme": "Tema",
+    "quickDefault": "Hızlı Tarama varsayılanı",
+    "deepDefault": "Derin Analiz varsayılanı",
+    "dark": "Koyu",
+    "light": "Açık",
+    "telegram": "Telegram bağlama kodu"
+  },
+  "health": {
+    "connected": "Bağlı",
+    "degraded": "Zayıf"
+  },
+  "chart": {
+    "clear": "Çizimleri temizle"
+  },
+  "build": {
+    "libraryHint": "Sürümlü Python strateji şablonları.",
+    "convertHint": "Seviyeler kilitlenir — yeni kural yok.",
+    "drawHint": "Çizimler ve metin taslak olur.",
+    "demoNote": "Canlıdan önce zorunlu demo. Yükseltme bot sayfasındadır."
   }
 }

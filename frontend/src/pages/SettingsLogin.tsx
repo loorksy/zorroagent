@@ -13,7 +13,7 @@ export function SettingsPage() {
     <div className="max-w-md space-y-4">
       <h1 className="text-xl font-semibold">{t("nav.settings")}</h1>
       <label className="block text-sm">
-        Language
+        {t("settings.language")}
         <select
           className="w-full bg-muted rounded px-3 py-2"
           value={desk.language}
@@ -31,14 +31,14 @@ export function SettingsPage() {
         </select>
       </label>
       <label className="block text-sm">
-        Theme
+        {t("settings.theme")}
         <select className="w-full bg-muted rounded px-3 py-2" value={desk.theme} onChange={(e) => desk.setTheme(e.target.value as any)}>
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
+          <option value="dark">{t("settings.dark")}</option>
+          <option value="light">{t("settings.light")}</option>
         </select>
       </label>
       <label className="block text-sm">
-        Quick Scan default
+        {t("settings.quickDefault")}
         <select className="w-full bg-muted rounded px-3 py-2" defaultValue="claude-sonnet-5" onChange={(e) => api.settings({ quick_model: e.target.value })}>
           {MODELS.map((m) => (
             <option key={m} value={m}>
@@ -48,7 +48,7 @@ export function SettingsPage() {
         </select>
       </label>
       <label className="block text-sm">
-        Deep Analysis default
+        {t("settings.deepDefault")}
         <select className="w-full bg-muted rounded px-3 py-2" defaultValue="claude-fable-5" onChange={(e) => api.settings({ deep_model: e.target.value })}>
           {MODELS.map((m) => (
             <option key={m} value={m}>
@@ -63,7 +63,7 @@ export function SettingsPage() {
       <button className="rounded bg-muted px-3 py-2" onClick={() => desk.openModal("disclaimer")}>
         {t("modals.disclaimer")}
       </button>
-      <button className="rounded bg-red-600 px-3 py-2" onClick={() => desk.openModal("kill")}>
+      <button className="rounded bg-muted px-3 py-2" onClick={() => desk.openModal("kill")}>
         {t("buttons.kill")}
       </button>
     </div>
@@ -78,7 +78,7 @@ export function LoginPage() {
   const [err, setErr] = useState("");
   return (
     <form
-      className="max-w-sm mx-auto mt-24 space-y-3"
+      className="max-w-sm mx-auto mt-24 space-y-3 px-4"
       onSubmit={async (e) => {
         e.preventDefault();
         try {
@@ -100,8 +100,8 @@ export function LoginPage() {
         <input type="password" className="w-full bg-muted rounded px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("auth.passwordPlaceholder")} required />
       </label>
       {err && <p className="text-red-400 text-sm">{err}</p>}
-      <button className="w-full rounded bg-accent text-primary py-2">{t("auth.signIn")}</button>
-      <p className="text-xs text-slate-500">{t("app.disclaimer")}</p>
+      <button className="w-full rounded liquid-metal py-2">{t("auth.signIn")}</button>
+      <p className="text-xs text-muted-fg">{t("app.disclaimer")}</p>
     </form>
   );
 }

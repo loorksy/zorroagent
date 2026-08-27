@@ -31,6 +31,9 @@ class FakeDB:
     async def commit(self):
         return None
 
+    async def refresh(self, obj):
+        return None
+
 
 @pytest.mark.asyncio
 async def test_stopall_engages_kill_switch():

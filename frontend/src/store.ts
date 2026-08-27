@@ -30,6 +30,7 @@ type State = {
   banner: string | null;
   modal: ModalName;
   modalPayload: any;
+  health: string;
   setToken: (t: string | null) => void;
   setLang: (l: "en" | "tr" | "ar") => void;
   setTheme: (t: "dark" | "light") => void;
@@ -38,6 +39,7 @@ type State = {
   setTimeframe: (t: string) => void;
   setTier: (t: "quick" | "deep") => void;
   setBanner: (b: string | null) => void;
+  setHealth: (h: string) => void;
   openModal: (m: ModalName, payload?: any) => void;
   closeModal: () => void;
 };
@@ -55,6 +57,7 @@ export const useDesk = create<State>()(
       banner: null,
       modal: null,
       modalPayload: null,
+      health: "disconnected",
       setToken: (t) => {
         if (t) localStorage.setItem("zorro.token", t);
         else localStorage.removeItem("zorro.token");
@@ -73,6 +76,7 @@ export const useDesk = create<State>()(
       setTimeframe: (t) => set({ timeframe: t }),
       setTier: (t) => set({ tier: t }),
       setBanner: (b) => set({ banner: b }),
+      setHealth: (h) => set({ health: h }),
       openModal: (m, payload) => set({ modal: m, modalPayload: payload ?? null }),
       closeModal: () => set({ modal: null, modalPayload: null }),
     }),

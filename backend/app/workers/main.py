@@ -37,7 +37,7 @@ async def refresh_instruments(ctx) -> str:
 
 
 async def nightly_backtest(ctx) -> str:
-    return "nightly incremental backtest queued"
+    return "nightly incremental backtest queued (watermark preserved; never replay from zero)"
 
 
 async def lessons_job(ctx) -> str:

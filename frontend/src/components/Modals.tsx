@@ -7,11 +7,20 @@ import { RecCard } from "./RecCard";
 function Overlay({ title, children }: { title: string; children: React.ReactNode }) {
   const close = useDesk((s) => s.closeModal);
   const { t } = useTranslation();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [close]);
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="w-full max-w-lg max-h-[90vh] overflow-auto rounded-xl border border-line bg-card p-5 space-y-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-auto rounded-lg border border-line bg-card p-5 space-y-4">
         <header className="flex justify-between items-center">
-          <h2 className="font-semibold">{title}</h2>
+          <h2 id="modal-title" className="font-semibold">
+            {title}
+          </h2>
           <button className="touch-target text-sm" onClick={close} aria-label={t("buttons.close")}>
             {t("buttons.close")}
           </button>
@@ -87,7 +96,7 @@ export function Modals() {
           <input className="w-full bg-muted rounded px-3 py-2" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={t("forms.pinPlaceholder")} />
         </Field>
         <button
-          className="w-full touch-target rounded bg-accent text-primary font-medium py-2"
+          className="w-full touch-target rounded bg-foreground text-primary-fg font-medium py-2"
           onClick={async () => {
             if (!lots) return;
             try {
@@ -116,7 +125,7 @@ export function Modals() {
     const g = payload?.gates || [];
     return (
       <Overlay title={t("modals.confirmRec")}>
-        <RecCard rec={payload} />
+        <RecCard rec={payload} surface="saved" />
         <ul className="text-sm space-y-1">
           {g.map((x: any) => (
             <li key={x.gate_id}>
@@ -133,7 +142,7 @@ export function Modals() {
       <Overlay title={t("modals.kill")}>
         <p>{t("modals.stopAll")}</p>
         <button
-          className="w-full touch-target rounded bg-red-600 py-2"
+          className="w-full touch-target rounded bg-sell py-2 text-white"
           onClick={async () => {
             await api.kill(true, "ui");
             close();

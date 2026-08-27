@@ -20,7 +20,18 @@ export function ChartPage() {
           </button>
         ))}
       </div>
-      <KLineChartPro symbol={id || ""} timeframe={desk.timeframe} />
+      <KLineChartPro
+        symbol={id || ""}
+        timeframe={desk.timeframe}
+        overlays={
+          desk.modalPayload
+            ? [
+                { price: desk.modalPayload.preferred_entry, label: "entry", color: "var(--info)" },
+                { price: desk.modalPayload.stop_loss, label: "sl", color: "var(--sell)" },
+              ]
+            : undefined
+        }
+      />
     </div>
   );
 }

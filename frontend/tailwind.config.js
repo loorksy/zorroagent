@@ -5,15 +5,35 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#0F172A",
-        secondary: "#1E293B",
-        accent: "#22C55E",
-        desk: "#020617",
-        card: "#0E1223",
-        muted: "#1A1E2F",
-        line: "#334155",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        card: "var(--card)",
+        muted: "var(--muted)",
+        "muted-fg": "var(--muted-foreground)",
+        line: "var(--border)",
+        desk: "var(--background)",
+        primary: "var(--primary)",
+        "primary-fg": "var(--primary-foreground)",
+        buy: "var(--buy)",
+        sell: "var(--sell)",
+        warning: "var(--warning)",
+        info: "var(--info)",
+        destructive: "var(--destructive)",
+        sidebar: "var(--sidebar)",
+        ring: "var(--ring)",
+        // trading green only — never brand chrome
+        accent: "var(--buy)",
       },
-      fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+      borderRadius: {
+        DEFAULT: "0.625rem",
+        lg: "0.875rem",
+      },
+      fontFamily: {
+        sans: ["Inter", "Cairo", "system-ui", "sans-serif"],
+      },
+      minHeight: {
+        touch: "44px",
+      },
     },
   },
   plugins: [],

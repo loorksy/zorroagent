@@ -53,6 +53,17 @@ class SafetyVerdict:
     evidence: dict[str, Any] = field(default_factory=dict)
 
 
+def promote_gate(demo_success: bool, confirmation: str, canonical_id: str, pin_ok: bool) -> tuple[bool, int, str]:
+    """Promote-to-live without demo or PIN/typed symbol is blocked (403)."""
+    if not demo_success:
+        return False, 403, "Mandatory demo success before live"
+    if not confirmation:
+        return False, 403, "PIN or typed canonical symbol required"
+    if confirmation != canonical_id and not pin_ok:
+        return False, 403, "Type the canonical symbol or PIN"
+    return True, 200, "ok"
+
+
 def check_bot_safety(ctx: SafetyContext) -> SafetyVerdict:
     failed: list[str] = []
     if ctx.kill_switch:
