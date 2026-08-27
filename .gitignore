@@ -1,0 +1,50 @@
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/www/
+frontend/android/app/build/
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/app/src/main/assets/public/
+frontend/android/captures/
+*.apk
+*.aab
+*.keystore
+
+# Graphify / design
+graphify-out/cache/
+.graphify_python
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+*.tsbuildinfo
+.redis-data/
+.postgres-data/
+coverage/
+.turbo/
