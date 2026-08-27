@@ -21,13 +21,30 @@ Copy `.env.example` to `.env`. Missing keys degrade health to `disconnected`; th
 | `METAAPI_TOKEN` / `METAAPI_ACCOUNT_ID` | Execution only. Analysis must run with this unset. |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_ALLOWED_CHAT_ID` | Same brain as web. `/stopall` → `apply_kill_switch` |
 
+## Bootstrap .env vs Settings overlay (Appendix C)
+
+`.env` is **first install only** for trading credentials. After launch, the operator sets keys in **Settings** (Market data / News / Execution / Models / Telegram). Saved Settings values **override** `.env`. Empty / Clear **falls back** to `.env`.
+
+| Key | Where to edit | Restart needed? |
+|---|---|---|
+| `ANTHROPIC_API_KEY`, `OANDA_API_TOKEN` / `OANDA_API_KEY`, `OANDA_ACCOUNT_ID`, `OANDA_ENV`, `TWELVE_DATA_API_KEY`, `PRICE_DIVERGENCE_BPS`, `FINNHUB_API_KEY`, `METAAPI_TOKEN`, `METAAPI_ACCOUNT_ID`, broker/server, account type, `TELEGRAM_BOT_TOKEN`, linking code, optional Sentry DSN / public URL / webhook URL | Settings page. Encrypted at rest. GET returns last-4 + configured/missing — never the full secret. | **API: no.** Clients re-read the overlay on every call. **Arq workers: no restart** — each job reloads overlay from Postgres at start. An in-flight job keeps the credentials it started with. |
+| `DATABASE_URL`, `REDIS_URL`, `ENCRYPTION_KEY` / `SETTINGS_SECRET`, `JWT_SECRET`, bind host/port | `.env` / host only. Never sent to the browser. Settings → System shows Postgres/Redis **connected/disconnected** without URLs. | Process restart. |
+
+Test Connection on Settings uses the **form value including unsaved drafts** and reports pass/fail in EN/TR/AR. Missing keys fail honestly (no fake pass).
+
+Telegram linking: Settings → Generate code, then send `/link CODE` to the bot (or revoke from Settings).
+
+REST: `GET/PUT /api/settings/providers`, `POST /api/settings/providers/{oanda,twelve,finnhub,metaapi,anthropic,telegram}/test`.
+
+Alembic: `0002_settings_overlay` (`encrypted_secrets`, `settings_audit`). `alembic upgrade head` on empty DB.
+
 ## Start (local)
 
 ```bash
 cp .env.example .env
 docker compose up -d postgres redis   # if compose is present
 cd backend && pip install -e ".[dev]"
-alembic upgrade head                  # empty DB: apply migrations
+alembic upgrade head                  # empty DB: 0001_initial + 0002_settings_overlay
 uvicorn app.main:app --reload --port 8000
 
 cd ../frontend && npm install && npm run dev

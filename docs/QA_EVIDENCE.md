@@ -1,15 +1,15 @@
-# QA evidence pack — Appendix B
+# QA evidence pack — Appendix B + Appendix C
 
 Repo: `loorksy/zorroagent`  
 Branch: `cursor/ai-trading-assistant-47d6`  
 PR: https://github.com/loorksy/zorroagent/pull/1  
 Preferred base: `main`
 
-**Git SHA (this pack):** `24ab4daffd518a410bfbce310c3d8750b71b0bae`
+**Git SHA (this pack):** `6ee18bd` (overlay implementation) + this docs commit.
 
-Method: audit-as-untrusted. No live OANDA / Anthropic / MetaApi / Telegram secrets in this environment (no `.env`; `.env.example` only). Live labs that need those keys are **BLOCKED**, not faked.
+Method: audit-as-untrusted. No live OANDA / Anthropic / MetaApi / Telegram secrets in this environment (no `.env`; `.env.example` only). Live labs that need those keys are **BLOCKED**, not faked. Live Test Connection is reported as **fail** when keys are missing — never a fake pass.
 
-**B15 sentence is not used.** B0.3 is false (live OANDA Deep Analysis).
+**B15 sentence is not used.** B0.3 is false (live OANDA Deep Analysis). **B0.11 is TRUE** (Settings overlay).
 
 ---
 
@@ -18,7 +18,7 @@ Method: audit-as-untrusted. No live OANDA / Anthropic / MetaApi / Telegram secre
 | # | Condition | Status |
 |---|---|---|
 | 1 | Every route loads 1280 / 768 / 390 + RTL Arabic without crash | **TRUE** — Playwright smoke 64/64 `#main` present, 0 `pageerror` after `asList` fail-closed fix. Pack in `docs/qa-screenshots/`. |
-| 2 | Automated tests for gates, fill-rule, alias, backtest, bot loop, kill, divergence | **TRUE** — `pytest -q` **89 passed**; `npm test` **14 passed**. |
+| 2 | Automated tests for gates, fill-rule, alias, backtest, bot loop, kill, divergence | **TRUE** — `pytest -q` **101 passed**; `npm test` **16 passed**. |
 | 3 | Live Deep Analysis XAU_USD + FX with real OANDA chart images | **FALSE / BLOCKED** — `OANDA_API_KEY` unset. No fabricated candles or BUY/SELL. |
 | 4 | Bot CODE → MIND → DEMO fill; promote blocked without demo+PIN | **PARTIAL** — unit paths pass (`test_bot_loop.py`, `test_bot_safety.py`). Live demo fill **BLOCKED** (no MetaApi). Promote without demo/PIN returns 403. |
 | 5 | Kill switch web + Telegram `/stopall` share one function | **TRUE** (code + tests). Live Telegram `/stopall` **BLOCKED** (no bot token). |
@@ -27,8 +27,9 @@ Method: audit-as-untrusted. No live OANDA / Anthropic / MetaApi / Telegram secre
 | 8 | UI matches AiChart desk family | **TRUE with gaps** — rail, tokens, bottom composer, one liquid-metal Send, no execute on thread card. Chart empty without OANDA. See B2. |
 | 9 | EN / TR / AR complete; Arabic RTL | **TRUE** after skip-link overflow fix. Recaptured pack: AR-dark-390-ask-rec.png = 43870 bytes (was 2737 black). |
 | 10 | This evidence file | **TRUE** (this document). |
+| 11 | Settings overlay for all C2 keys works, tested, masked, and documented | **TRUE** — `GET/PUT /api/settings/providers` + Test per provider; secrets last-4 only; i18n EN/TR/AR; screenshots `docs/qa-screenshots/settings-providers.png` (dark) and `settings-providers-light.png`. See Appendix C below. |
 
-Remaining **false** B0 items: **3** (live OANDA). **4** live demo fill is blocked (unit coverage exists).
+Remaining **false** B0 items: **3** (live OANDA). **4** live demo fill is blocked (unit coverage exists). **B0.11 is true.**
 
 ---
 
@@ -36,10 +37,14 @@ Remaining **false** B0 items: **3** (live OANDA). **4** live demo fill is blocke
 
 ```
 cd /workspace/backend && python3 -m pytest -q
-# exit 0 — 89 passed, 1 warning (passlib crypt deprecation)
+# exit 0 — 101 passed, 1 warning (passlib crypt deprecation)
+# Appendix C: test_settings_overlay.py (GET last-4, overlay vs .env, unsaved Test, audit, no MCP)
 
 cd /workspace/frontend && npm test
-# exit 0 — 14 passed / 4 files (vitest)
+# exit 0 — 16 passed / 5 files (vitest) including settings.test.tsx
+
+python3 /workspace/scripts/qa_settings_providers.py
+# exit 0 — docs/qa-screenshots/settings-providers.png + settings-providers-light.png
 
 python3 /workspace/scripts/qa_screenshots.py
 # exit 0 — 180 PNGs, MIN_BYTES 8000 enforced
@@ -160,6 +165,10 @@ Compared to cloned AiChart console (not the marketing site): same family — whi
 | Disclaimer visible; no monthly return % | PASS | footer + i18n; B6 |
 | ui-ux-pro-max applied; gstack QA role run | PASS | skip-link, 44px targets, focus rings, one primary CTA, dialog aria-modal; this pack is the QA role. **No git tag** (Release Manager). |
 | Graphify this repo + AiChart doctrine | PASS | `graphify-out/GRAPH_REPORT.md` — 782 nodes; god nodes Operator/Direction/analyze()/OandaClient not TODO |
+| Provider credentials configurable in Settings | **PASS** | Settings groups Market/News/Execution/Models/Telegram/System; `PUT /api/settings/providers`; `test_anthropic_key_settable_via_api` |
+| Secrets masked; last-4 only on read | **PASS** | GET never returns full secret (`test_get_providers_never_returns_full_secret`); UI `type=password` + last-4; copy forbidden |
+| Test Connection per provider | **PASS (mocked + honest fail)** | `POST /api/settings/providers/{provider}/test` uses unsaved form body (`test_test_endpoint_uses_unsaved_form_value`). Live keys missing → fail, not a fake pass (see C Test results). |
+| Settings overrides .env; empty falls back to .env | **PASS** | `test_overlay_overrides_env`; `test_empty_overlay_falls_back_to_env`; OandaClient re-reads overlay without restart |
 
 ---
 
@@ -195,10 +204,71 @@ Searched `backend/app` and `frontend/src` (not lockfiles, not this brief).
 | 3.8 i18n | `test_i18n_keys.py`, desk.test i18n keys |
 | 3.9 Auth/security | `test_api_auth.py`, `test_security.py` |
 | 3.10 Health | `test_api_health.py` `/healthz` |
-| 3.11 Frontend | `desk.test.tsx`, `api.test.ts`, `login.test.tsx`, `build.test.tsx` |
+| 3.11 Frontend | `desk.test.tsx`, `api.test.ts`, `login.test.tsx`, `build.test.tsx`, `settings.test.tsx` |
+| C overlay | `test_settings_overlay.py` |
 | B6 static | `test_b6_static.py` |
 
-**Counts:** backend **89 passed** / 0 failed; frontend **14 passed** / 0 failed.
+**Counts:** backend **101 passed** / 0 failed; frontend **16 passed** / 0 failed.
+
+---
+
+## Appendix C — Settings-owned environment
+
+Principle: `.env` is bootstrap only. After first launch the operator configures the desk from Settings. Overlay wins when non-empty; empty falls back to `.env`. Trading clients resolve through `get_setting()` in `app/runtime_config.py`, not raw `os.environ` in client modules.
+
+### C2 keys in Settings (Save / Test / Clear)
+
+| Group | Keys |
+|---|---|
+| Market data | `OANDA_API_TOKEN`, `OANDA_ACCOUNT_ID`, `OANDA_ENV` (practice\|live), `TWELVE_DATA_API_KEY`, price-divergence bps |
+| News | `FINNHUB_API_KEY` |
+| Execution | `METAAPI_TOKEN`, `METAAPI_ACCOUNT_ID`, broker/server, account type demo\|live; alias map linked to Account |
+| Models | `ANTHROPIC_API_KEY`, default quick/deep; five-model picker remains |
+| Telegram | `TELEGRAM_BOT_TOKEN`, generate/revoke linking code |
+| Optional | Sentry DSN, public app URL, webhook base URL |
+| System (read-only) | Postgres / Redis connected\|disconnected — **no URLs with passwords** |
+
+Env-only (never in the browser): `DATABASE_URL`, `REDIS_URL`, `ENCRYPTION_KEY` / `SETTINGS_SECRET`, bind host/port. PUT of those or any MCP key is **400**.
+
+Encrypted at rest (`encrypted_secrets` + Fernet via `ENCRYPTION_KEY`/`SETTINGS_SECRET`). Audit log stores **key name + action + time**, never the secret (`settings_audit`).
+
+API hot-reload: overlay is in-memory; clients read `get_setting()` per call. Arq workers call `load_overlay_from_db` at the start of each job — **no worker restart for API keys**. Documented in `docs/RUNBOOK.md`.
+
+### Test Connection results (this environment)
+
+Live keys are **not present**. Results below are honest fails, not faked passes.
+
+| Provider | Ping | Result |
+|---|---|---|
+| OANDA | instruments | **FAIL** `OANDA is not configured.` (no network when missing) |
+| Twelve Data | quote | **FAIL** `Twelve Data is not configured.` |
+| Finnhub | calendar | **FAIL** `Finnhub is not configured.` |
+| MetaApi | account | **FAIL** `MetaApi is not configured.` |
+| Anthropic | models.list | **FAIL** `Anthropic is not configured.` |
+| Telegram | getMe | **FAIL** `Telegram is not configured.` |
+
+Mocked httpx (unsaved form value): OANDA Test sends `Authorization: Bearer <unsaved>` and returns pass; Anthropic Test sends `x-api-key: sk-unsaved-ANTH`. See `backend/tests/test_settings_overlay.py`.
+
+PUT `ANTHROPIC_API_KEY=sk-ant-SUPERSECRET-xyz9876ABCD` then GET: full secret **absent**; `last4=ABCD`, `source=settings`.
+
+### Grep proof — trading keys are not ONLY `os.environ`
+
+Client modules call `get_setting(...)`. Overlay reads Settings DB then `os.environ` as fallback inside `runtime_config.py` only.
+
+| Module | API key resolution |
+|---|---|
+| `feeds/oanda.py` | `get_setting("OANDA_API_TOKEN")` |
+| `feeds/twelve.py` | `get_setting("TWELVE_DATA_API_KEY")` (base URL may use env) |
+| `feeds/finnhub.py` | `get_setting("FINNHUB_API_KEY")` (base URL may use env) |
+| `execution/metaapi.py` | `get_setting("METAAPI_TOKEN")` |
+| `agent/runtime.py` | `get_setting("ANTHROPIC_API_KEY")` then temporary env inject for the Claude SDK **after** overlay resolve |
+| `telegram/bot.py` | `get_setting("TELEGRAM_ALLOWED_CHAT_ID")` / link code |
+
+No MCP providers in overlay catalog (`test_no_mcp_in_overlay_catalog`, B6 grep).
+
+Screenshots: `docs/qa-screenshots/settings-providers.png` (dark 1280), `docs/qa-screenshots/settings-providers-light.png`. Groups, masked secrets, last-4, Test/Save/Clear, no MCP.
+
+---
 
 ---
 
@@ -290,8 +360,9 @@ Desk remains AiChart-family, not generic admin.
 1. Live market data, LLM vision, broker fills, and Telegram are **unproven in this environment**. Health will show disconnected until keys are present.
 2. p95 analyze latency, Redis-down order corruption, and empty-DB alembic were **not** executed against real services here.
 3. Android APK binary is **not** in the repo (`*.apk` gitignored; SDK missing).
-4. ManagePullRequest tool is **not in this agent's catalog**; PR body was not edited. Suggested body: point reviewers at `docs/QA_EVIDENCE.md` and the remaining risks above. PR URL remains https://github.com/loorksy/zorroagent/pull/1
+4. ManagePullRequest tool is **not in this agent's catalog**; PR body was not edited via that tool. Suggested Appendix C addition is below. PR URL remains https://github.com/loorksy/zorroagent/pull/1
 5. Graphify report SHA may lag the latest commit until `graphify update .` is re-run.
+6. Live Test Connection against OANDA/Anthropic/MetaApi/Finnhub/Twelve/Telegram **failed honestly** (keys missing). Mocked httpx tests prove unsaved form values are the ones sent.
 
 ---
 
@@ -301,12 +372,19 @@ Desk remains AiChart-family, not generic admin.
 ## QA (Appendix B)
 Evidence: docs/QA_EVIDENCE.md
 Runbook: docs/RUNBOOK.md
-Screenshots: docs/qa-screenshots/ (180 Playwright Chrome captures)
+Screenshots: docs/qa-screenshots/ (180 Playwright Chrome captures + settings-providers.png)
 
-pytest 89 passed · vitest 14 passed
+pytest 101 passed · vitest 16 passed
 
 Live OANDA Deep Analysis: BLOCKED (no keys) — B0.3 false.
 Do not treat this PR as live-feed certified.
+
+## Appendix C — Settings-owned environment
+Trading credentials are editable in Settings (encrypted at rest, last-4 on GET).
+Settings overlay overrides .env; empty falls back to .env.
+Test Connection per provider; missing keys fail honestly (not faked).
+API clients hot-reload; Arq workers re-read overlay at the start of each job.
+B0.11 TRUE. No MCP.
 ```
 
 ---
