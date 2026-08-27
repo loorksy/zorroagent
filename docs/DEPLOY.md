@@ -63,11 +63,20 @@ certbot --nginx -d zorro.lork.cloud -d zorroagent.lork.cloud
 
 ## URLs (this host)
 
-After the isolated deploy documented here:
+Deployed 2026-08-27 on `srv1150752` (`72.60.83.140`), directory `/opt/zorroagent`.
 
-- UI: `http://<VPS-IP>:8088/`
-- Named vhost (wildcard `*.lork.cloud` already pointed here): `http://zorro.lork.cloud/`
-- Health: `http://<VPS-IP>:8088/healthz` and `/health`
+**Ports were free before bind** (`ss -tlnp` showed nothing on 8080–8099 or 18088). Occupied ports left alone: 80/443 (nginx), 22, 3010, 3020, 3780, 8787, 8791, localhost 5432/6379/3000/8788/20128.
+
+| Bind | Role |
+|---|---|
+| `0.0.0.0:8088` | **new** host nginx site `zorroagent.conf` only |
+| `127.0.0.1:18088` | docker `zorroagent-web` (not public) |
+| docker internal 5432 / 6379 | Zorro postgres/redis — **not published** |
+
+- UI (TLS, new cert `zorro.lork.cloud` only): https://zorro.lork.cloud/ and https://zorroagent.lork.cloud/
+- UI (dedicated unused port): http://72.60.83.140:8088/
+- Health: `/healthz` and `/health` on those origins
+- Bootstrap operator file on the VPS (mode 600, not in git): `/opt/zorroagent/.operator-bootstrap`
 
 Trading keys are entered in **Settings → Providers** after first login. Bootstrap `.env` only needs database, redis, and encryption/JWT secrets.
 
@@ -98,4 +107,5 @@ docker ps --filter name=zorroagent
 curl -sS http://127.0.0.1:18088/healthz
 curl -sS http://127.0.0.1:8088/healthz
 curl -sS -H 'Host: zorro.lork.cloud' http://127.0.0.1/healthz
+curl -sS https://zorro.lork.cloud/healthz
 ```
