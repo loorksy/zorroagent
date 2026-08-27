@@ -1,4 +1,7 @@
-"""OANDA catalog + candles. Sole source of truth for analysis numbers."""
+"""OANDA catalog + candles. Sole source of truth for analysis numbers.
+
+Credentials resolve through the Settings overlay (get_setting), never raw os.environ.
+"""
 
 from __future__ import annotations
 
@@ -7,8 +10,8 @@ from typing import Any
 
 import httpx
 
-from app.config import get_settings
 from app.enums import AssetClass, FeedStatus
+from app.runtime_config import get_setting, oanda_base_url
 
 
 @dataclass
@@ -37,16 +40,36 @@ def classify_instrument(name: str, type_: str | None) -> AssetClass:
 
 
 class OandaClient:
-    def __init__(self) -> None:
-        self.settings = get_settings()
+    def __init__(
+        self,
+        *,
+        api_token: str | None = None,
+        account_id: str | None = None,
+        environment: str | None = None,
+    ) -> None:
+        self._api_token = api_token
+        self._account_id = account_id
+        self._environment = environment
+
+    @property
+    def api_token(self) -> str:
+        return self._api_token if self._api_token is not None else get_setting("OANDA_API_TOKEN")
+
+    @property
+    def account_id(self) -> str:
+        return self._account_id if self._account_id is not None else get_setting("OANDA_ACCOUNT_ID")
+
+    @property
+    def base_url(self) -> str:
+        return oanda_base_url(self._environment)
 
     @property
     def configured(self) -> bool:
-        return bool(self.settings.oanda_api_key and self.settings.oanda_account_id)
+        return bool(self.api_token and self.account_id)
 
     def _headers(self) -> dict[str, str]:
         return {
-            "Authorization": f"Bearer {self.settings.oanda_api_key}",
+            "Authorization": f"Bearer {self.api_token}",
             "Accept-Datetime-Format": "RFC3339",
         }
 
@@ -56,7 +79,7 @@ class OandaClient:
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 r = await client.get(
-                    f"{self.settings.oanda_base_url}/v3/accounts/{self.settings.oanda_account_id}",
+                    f"{self.base_url}/v3/accounts/{self.account_id}",
                     headers=self._headers(),
                 )
             if r.status_code == 200:
@@ -70,7 +93,7 @@ class OandaClient:
             return []
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.get(
-                f"{self.settings.oanda_base_url}/v3/accounts/{self.settings.oanda_account_id}/instruments",
+                f"{self.base_url}/v3/accounts/{self.account_id}/instruments",
                 headers=self._headers(),
             )
             r.raise_for_status()
@@ -97,7 +120,7 @@ class OandaClient:
             return None
         async with httpx.AsyncClient(timeout=20) as client:
             r = await client.get(
-                f"{self.settings.oanda_base_url}/v3/instruments/{instrument}/candles",
+                f"{self.base_url}/v3/instruments/{instrument}/candles",
                 headers=self._headers(),
                 params={"granularity": granularity, "count": count, "price": "MBA"},
             )
@@ -110,7 +133,7 @@ class OandaClient:
             return None
         async with httpx.AsyncClient(timeout=10) as client:
             r = await client.get(
-                f"{self.settings.oanda_base_url}/v3/accounts/{self.settings.oanda_account_id}/pricing",
+                f"{self.base_url}/v3/accounts/{self.account_id}/pricing",
                 headers=self._headers(),
                 params={"instruments": instrument},
             )

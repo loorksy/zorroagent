@@ -55,6 +55,36 @@ def mock(route):
                     "source": "OANDA",
                 }
             )
+        if "/api/settings/providers" in url:
+            return route.fulfill(
+                json={
+                    "providers": {
+                        "oanda": {
+                            "status": "missing",
+                            "fields": {
+                                "OANDA_API_TOKEN": {"status": "missing", "last4": ""},
+                                "OANDA_ACCOUNT_ID": {"status": "missing", "last4": ""},
+                                "OANDA_ENV": {"status": "configured", "value": "practice", "source": "env"},
+                            },
+                        },
+                        "twelve": {
+                            "status": "missing",
+                            "fields": {
+                                "TWELVE_DATA_API_KEY": {"status": "missing", "last4": ""},
+                                "PRICE_DIVERGENCE_BPS": {"status": "configured", "value": "15", "source": "env"},
+                            },
+                        },
+                        "finnhub": {"status": "missing", "fields": {"FINNHUB_API_KEY": {"status": "missing", "last4": ""}}},
+                        "metaapi": {"status": "missing", "fields": {"METAAPI_TOKEN": {"status": "missing", "last4": ""}}},
+                        "anthropic": {"status": "missing", "fields": {"ANTHROPIC_API_KEY": {"status": "missing", "last4": ""}}},
+                        "telegram": {"status": "missing", "fields": {"TELEGRAM_BOT_TOKEN": {"status": "missing", "last4": ""}}},
+                        "optional": {"status": "missing", "fields": {}},
+                    },
+                    "system": {"postgres": "disconnected", "redis": "disconnected"},
+                    "audit": [],
+                    "hot_reload": {"api": True, "workers": "reload overlay per job"},
+                }
+            )
         if "/conversations" in url:
             return route.fulfill(json=[{"id": "c1", "title": "XAU_USD"}])
         if "/recommendations" in url:

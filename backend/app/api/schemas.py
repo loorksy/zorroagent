@@ -123,3 +123,14 @@ class WatchlistIn(BaseModel):
 class StrategyOptimizeIn(BaseModel):
     param_grid: dict[str, list[Any]]
     canonical_id: str
+
+
+class ProvidersIn(BaseModel):
+    """PUT /api/settings/providers — extra keys validated in runtime_config."""
+
+    model_config = {"extra": "allow"}
+
+
+class StrategyOptimizeIn(BaseModel):
+    param_grid: dict[str, list[Any]]
+    canonical_id: str

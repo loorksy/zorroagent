@@ -32,6 +32,7 @@ from app.api.schemas import (
     SettingsIn,
     WatchlistIn,
 )
+from app.api.settings_routes import router as settings_router
 from app.backtest.engine import CostModel, CostModelRequired, IncrementState, incremental_backtest, oos_fragility_tag, run_backtest
 from app.bots.kill import apply_kill_switch
 from app.bots.safety import SafetyContext, check_bot_safety, promote_gate
@@ -83,6 +84,7 @@ from app.security import create_token, decrypt_secret, encrypt_secret, hash_pass
 from app.symbols.alias import resolve_alias, validate_alias_payload
 from app.logging_conf import setup_logging
 from app.telegram.bot import handle_telegram_update
+from app.runtime_config import divergence_bps, get_setting, load_overlay_from_db
 
 setup_logging()
 settings = get_settings()
@@ -104,6 +106,11 @@ def _rate_ok(key: str, limit: int) -> bool:
 async def lifespan(app: FastAPI):
     try:
         await create_all()
+        from app.db.session import get_session_factory
+
+        factory = get_session_factory()
+        async with factory() as db:
+            await load_overlay_from_db(db)
     except Exception:
         # DB may be down in unit tests / first boot without compose
         pass
@@ -111,6 +118,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Zorro AI Trading Assistant", version="1.0.0", lifespan=lifespan)
+app.include_router(settings_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list or ["*"],
@@ -176,7 +184,7 @@ async def health():
             "twelve_data": {"status": t_s.value, "detail": t_d},
             "finnhub": {"status": f_s.value, "detail": f_d},
             "metaapi": {"status": m_s.value, "detail": m_d},
-            "anthropic": "connected" if settings.anthropic_api_key else "disconnected",
+            "anthropic": "connected" if get_setting("ANTHROPIC_API_KEY") else "disconnected",
         },
     }
 
@@ -204,7 +212,7 @@ async def models():
         "models": [
             {"id": k.value, **v} for k, v in MODEL_CATALOG.items()
         ],
-        "defaults": {"quick": settings.quick_model, "deep": settings.deep_model},
+        "defaults": {"quick": get_setting("QUICK_MODEL"), "deep": get_setting("DEEP_MODEL")},
     }
 
 
@@ -319,7 +327,7 @@ async def price(canonical_id: str):
             t = float(twelve.get("close") or twelve.get("price") or 0) or None
         except (TypeError, ValueError):
             t = None
-    div = check_divergence(mid, t, settings.price_divergence_bps)
+    div = check_divergence(mid, t, divergence_bps())
     return {
         "oanda": oanda if oanda else "Not available",
         "twelve_crosscheck": t,
@@ -431,7 +439,7 @@ async def analyze(body: AnalyzeIn, db: AsyncSession = Depends(get_db), op: Opera
             tpx = float(twelve_q.get("close") or twelve_q.get("price") or 0) or None
         except (TypeError, ValueError):
             tpx = None
-    div = check_divergence(mid, tpx, settings.price_divergence_bps)
+    div = check_divergence(mid, tpx, divergence_bps())
 
     from app.agent.tools import compute_atr, compute_structure, compute_zones, get_candles
 
@@ -529,7 +537,7 @@ async def analyze(body: AnalyzeIn, db: AsyncSession = Depends(get_db), op: Opera
         spread=spread,
         typical_spread=typical,
         divergence_bps=div.bps or 0,
-        divergence_limit_bps=settings.price_divergence_bps,
+        divergence_limit_bps=divergence_bps(),
         vision_timeframes=vision_tfs,
         vision_ok=vision_ok,
         cost_model={"spread": spread or 0, "slippage": (spread or 0) * 0.5},
@@ -829,9 +837,9 @@ async def add_account(payload: dict[str, Any], db: AsyncSession = Depends(get_db
     acc = BrokerAccount(
         name=payload.get("name") or "account",
         metaapi_account_id=payload.get("metaapi_account_id") or "",
-        encrypted_token=encrypt_secret(payload.get("token") or settings.metaapi_token or "unset"),
+        encrypted_token=encrypt_secret(payload.get("token") or get_setting("METAAPI_TOKEN") or "unset"),
         is_demo=bool(payload.get("is_demo", True)),
-        region=payload.get("region") or settings.metaapi_region,
+        region=payload.get("region") or get_setting("METAAPI_REGION"),
     )
     db.add(acc)
     await db.commit()
@@ -1211,7 +1219,7 @@ async def routes_doc():
             "/bots/:id/live": {"api": ["POST /api/bots/{id}/live"]},
             "/memory": {"api": ["/api/memory"]},
             "/review": {"api": ["/api/review"]},
-            "/settings": {"api": ["/api/settings", "/api/models"]},
+            "/settings": {"api": ["/api/settings", "/api/settings/providers", "/api/models"]},
             "/history": {"api": ["/api/history"]},
             "/login": {"api": ["POST /api/auth/login"], "auth": False},
         },

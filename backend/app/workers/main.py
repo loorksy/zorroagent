@@ -13,9 +13,11 @@ async def refresh_instruments(ctx) -> str:
     from app.db.models import Instrument
     from app.db.session import get_session_factory
     from app.feeds.oanda import OandaClient
+    from app.runtime_config import load_overlay_from_db
 
     factory = get_session_factory()
     async with factory() as db:
+        await load_overlay_from_db(db)
         rows = await OandaClient().fetch_instruments()
         for item in rows:
             existing = await db.get(Instrument, item.canonical_id)
@@ -49,9 +51,11 @@ async def feed_divergence_job(ctx) -> str:
     from app.db.session import get_session_factory
     from app.feeds.oanda import OandaClient
     from app.feeds.twelve import TwelveDataClient
+    from app.runtime_config import load_overlay_from_db
 
     factory = get_session_factory()
     async with factory() as db:
+        await load_overlay_from_db(db)
         for name, client in (("oanda", OandaClient()), ("twelve_data", TwelveDataClient())):
             status, detail = await client.health()
             row = await db.get(FeedHealth, name)
@@ -73,9 +77,11 @@ async def bot_tick(ctx) -> str:
     from app.bots.safety import SafetyContext, check_bot_safety
     from app.db.models import Bot, KillSwitch
     from app.db.session import get_session_factory
+    from app.runtime_config import load_overlay_from_db
 
     factory = get_session_factory()
     async with factory() as db:
+        await load_overlay_from_db(db)
         ks = await db.get(KillSwitch, 1)
         if ks and ks.engaged:
             return "kill switch — no orders"

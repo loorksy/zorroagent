@@ -3,7 +3,6 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +15,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 10080
     encryption_key: str = "dev-encryption-key-must-be-32b!!"
+    settings_secret: str = ""  # SETTINGS_SECRET — bootstrap only; falls back to encryption_key
     operator_pin: str = ""
     confirmation_pin: str = ""
     default_language: Literal["en", "tr", "ar"] = "en"
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     quick_model: str = "claude-sonnet-5"
     deep_model: str = "claude-fable-5"
 
-    oanda_api_key: str = ""
+    oanda_api_key: str = ""  # bootstrap; Settings overlay key is OANDA_API_TOKEN
     oanda_account_id: str = ""
     oanda_environment: str = "practice"
     oanda_base_url: str = "https://api-fxpractice.oanda.com"
@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     telegram_bot_token: str = ""
     telegram_webhook_secret: str = ""
     telegram_allowed_chat_id: str = ""
+
+    sentry_dsn: str = ""
+    public_app_url: str = ""
+    webhook_base_url: str = ""
 
     operator_email: str = "operator@local"
     operator_password: str = "change-me"

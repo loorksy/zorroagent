@@ -338,7 +338,20 @@ class FeedHealth(Base):
 
 
 class EncryptedSecret(Base):
+    """Operator Settings overlay. Secrets encrypted at rest. Empty/missing = fall back to .env."""
+
     __tablename__ = "encrypted_secrets"
     name: Mapped[str] = mapped_column(String(64), primary_key=True)
     ciphertext: Mapped[str] = mapped_column(Text)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SettingsAudit(Base):
+    """Which overlay key changed, when. NEVER stores the secret value."""
+
+    __tablename__ = "settings_audit"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    key_name: Mapped[str] = mapped_column(String(64))
+    action: Mapped[str] = mapped_column(String(16))  # set | clear | generate | revoke
+    operator_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

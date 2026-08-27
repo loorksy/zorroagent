@@ -69,13 +69,15 @@ def tool_specs() -> list[dict[str, Any]]:
 
 async def run_claude(model_id: str, prompt: str, images: list[dict[str, Any]] | None = None) -> str:
     """Invoke Claude Agent SDK. Graceful degradation when the key is missing."""
-    from app.config import get_settings
+    import os
 
-    settings = get_settings()
-    if not settings.anthropic_api_key:
+    from app.runtime_config import get_setting
+
+    api_key = get_setting("ANTHROPIC_API_KEY")
+    if not api_key:
         return (
             "[agent disconnected] ANTHROPIC_API_KEY is not configured. "
-            "Analysis tools and gates still run; the model turn is skipped."
+            "Set it in Settings → Models. Analysis tools and gates still run; the model turn is skipped."
         )
     try:
         from claude_agent_sdk import query, ClaudeAgentOptions
@@ -88,10 +90,18 @@ async def run_claude(model_id: str, prompt: str, images: list[dict[str, Any]] | 
         **sampling_kwargs(model_id),
     )
     chunks: list[str] = []
-    async for message in query(prompt=prompt, options=options):
-        text = getattr(message, "text", None) or getattr(message, "content", None)
-        if isinstance(text, str):
-            chunks.append(text)
+    previous = os.environ.get("ANTHROPIC_API_KEY")
+    os.environ["ANTHROPIC_API_KEY"] = api_key
+    try:
+        async for message in query(prompt=prompt, options=options):
+            text = getattr(message, "text", None) or getattr(message, "content", None)
+            if isinstance(text, str):
+                chunks.append(text)
+    finally:
+        if previous is None:
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+        else:
+            os.environ["ANTHROPIC_API_KEY"] = previous
     return "".join(chunks) or ""
 
 

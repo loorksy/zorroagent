@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.bots.kill import apply_kill_switch
-from app.config import get_settings
+from app.runtime_config import apply_overlay, get_setting, persist_overlay
 from app.db.models import Bot, Recommendation
 
 
@@ -25,11 +25,11 @@ HELP = (
 
 
 async def handle_telegram_update(payload: dict[str, Any], db: AsyncSession) -> dict[str, Any]:
-    settings = get_settings()
     message = (payload.get("message") or {})
     chat_id = str((message.get("chat") or {}).get("id") or "")
     text = (message.get("text") or "").strip()
-    if settings.telegram_allowed_chat_id and chat_id and chat_id != settings.telegram_allowed_chat_id:
+    allowed = get_setting("TELEGRAM_ALLOWED_CHAT_ID")
+    if allowed and chat_id and chat_id != allowed:
         return {"ok": False, "error": "unauthorized chat"}
     if not text:
         return {"ok": True, "reply": HELP}
@@ -45,8 +45,21 @@ async def handle_telegram_update(payload: dict[str, Any], db: AsyncSession) -> d
         await apply_kill_switch(db, engaged=False, reason="telegram:/killoff")
         return {"ok": True, "reply": "Kill switch disengaged."}
     if cmd == "/link":
-        code = f"ZORRO-{chat_id[-6:]}" if chat_id else "ZORRO-LOCAL"
-        return {"ok": True, "reply": f"Linking code: {code}. Enter it once on Settings → Telegram."}
+        provided = rest.strip()
+        stored = get_setting("TELEGRAM_LINK_CODE")
+        if provided and stored and provided == stored:
+            apply_overlay({"TELEGRAM_ALLOWED_CHAT_ID": chat_id})
+            try:
+                await persist_overlay(db, {"TELEGRAM_ALLOWED_CHAT_ID": chat_id})
+            except Exception:
+                pass
+            return {"ok": True, "reply": "Telegram linked. Same brain as the web desk."}
+        if not provided:
+            return {
+                "ok": True,
+                "reply": "Generate a linking code in Settings → Telegram, then send /link <code>.",
+            }
+        return {"ok": True, "reply": "Linking code did not match. Generate a new one in Settings."}
     if cmd == "/today":
         recs = (await db.scalars(select(Recommendation).order_by(Recommendation.created_at.desc()).limit(10))).all()
         lines = [f"{r.direction} {r.canonical_id} {r.plan_type} ({r.execution_status})" for r in recs] or ["No cards today."]
@@ -87,6 +100,6 @@ async def handle_telegram_update(payload: dict[str, Any], db: AsyncSession) -> d
     if cmd == "/ask":
         from app.agent.runtime import run_claude
 
-        reply = await run_claude(settings.deep_model, rest or "Scan the book.")
+        reply = await run_claude(get_setting("DEEP_MODEL"), rest or "Scan the book.")
         return {"ok": True, "reply": reply}
     return {"ok": True, "reply": HELP}

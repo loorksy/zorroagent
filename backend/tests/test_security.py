@@ -22,9 +22,13 @@ def test_mutating_routes_require_auth():
         ("/api/execute", "post"),
         ("/api/kill-switch", "post"),
         ("/api/settings", "put"),
+        ("/api/settings/providers", "put"),
+        ("/api/settings/providers/oanda/test", "post"),
     ]:
         r = getattr(client, method)(path, json={})
         assert r.status_code in {401, 403, 422}
+    r = client.get("/api/settings/providers")
+    assert r.status_code in {401, 403}
 
 
 def test_prompt_injection_in_news_cannot_change_system_rules():

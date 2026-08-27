@@ -1,4 +1,7 @@
-"""MetaApi execution. SL always attached. Idempotent. Never used for analysis candles."""
+"""MetaApi execution. SL always attached. Idempotent. Never used for analysis candles.
+
+Credentials resolve through the Settings overlay (get_setting), never raw os.environ.
+"""
 
 from __future__ import annotations
 
@@ -7,8 +10,8 @@ from typing import Any
 
 import httpx
 
-from app.config import get_settings
 from app.enums import Direction, FeedStatus
+from app.runtime_config import get_setting
 from app.symbols.alias import AliasResolution
 
 
@@ -32,12 +35,26 @@ class OrderResult:
 
 
 class MetaApiClient:
-    def __init__(self) -> None:
-        self.settings = get_settings()
+    def __init__(self, *, token: str | None = None, account_id: str | None = None, region: str | None = None) -> None:
+        self._token = token
+        self._account_id = account_id
+        self._region = region
+
+    @property
+    def token(self) -> str:
+        return self._token if self._token is not None else get_setting("METAAPI_TOKEN")
+
+    @property
+    def account_id(self) -> str:
+        return self._account_id if self._account_id is not None else get_setting("METAAPI_ACCOUNT_ID")
+
+    @property
+    def region(self) -> str:
+        return self._region if self._region is not None else (get_setting("METAAPI_REGION") or "new-york")
 
     @property
     def configured(self) -> bool:
-        return bool(self.settings.metaapi_token)
+        return bool(self.token)
 
     async def health(self) -> tuple[FeedStatus, str]:
         if not self.configured:
@@ -45,8 +62,8 @@ class MetaApiClient:
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 r = await client.get(
-                    "https://mt-client-api-v1.new-york.agiliumtrade.ai/users/current/accounts",
-                    headers={"auth-token": self.settings.metaapi_token},
+                    f"https://mt-client-api-v1.{self.region}.agiliumtrade.ai/users/current/accounts",
+                    headers={"auth-token": self.token},
                 )
             if r.status_code < 500:
                 return (FeedStatus.CONNECTED if r.status_code < 400 else FeedStatus.DISCONNECTED, f"HTTP {r.status_code}")
@@ -60,7 +77,7 @@ class MetaApiClient:
         try:
             async with httpx.AsyncClient(timeout=15) as client:
                 r = await client.get(
-                    f"https://mt-client-api-v1.{self.settings.metaapi_region}.agiliumtrade.ai"
+                    f"https://mt-client-api-v1.{self.region}.agiliumtrade.ai"
                     f"/users/current/accounts/{account_id}/symbols/{symbol}/specification",
                     headers={"auth-token": token},
                 )
@@ -92,7 +109,7 @@ class MetaApiClient:
         try:
             async with httpx.AsyncClient(timeout=20) as client:
                 r = await client.post(
-                    f"https://mt-client-api-v1.{self.settings.metaapi_region}.agiliumtrade.ai"
+                    f"https://mt-client-api-v1.{self.region}.agiliumtrade.ai"
                     f"/users/current/accounts/{account_id}/trade",
                     headers={"auth-token": token, "Idempotency-Key": order.idempotency_key},
                     json=payload,

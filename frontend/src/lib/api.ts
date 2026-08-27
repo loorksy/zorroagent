@@ -45,6 +45,12 @@ export const api = {
   me: () => req<any>("/api/me"),
   models: () => req<any>("/api/models"),
   settings: (body: any) => req("/api/settings", { method: "PUT", body: JSON.stringify(body) }),
+  providers: () => req<any>("/api/settings/providers"),
+  saveProviders: (body: any) => req<any>("/api/settings/providers", { method: "PUT", body: JSON.stringify(body) }),
+  testProvider: (provider: string, body: any = {}) =>
+    req<any>(`/api/settings/providers/${provider}/test`, { method: "POST", body: JSON.stringify(body) }),
+  telegramLink: (action: "generate" | "revoke") =>
+    req<any>("/api/settings/telegram/link", { method: "POST", body: JSON.stringify({ action }) }),
   instruments: (q?: string) => req<{ instruments: Instrument[] }>(`/api/instruments${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   candles: (id: string, tf = "15m") => req<any>(`/api/candles/${id}?timeframe=${tf}`),
   price: (id: string) => req<any>(`/api/price/${id}`),

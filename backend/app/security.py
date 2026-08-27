@@ -16,8 +16,9 @@ pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def _fernet() -> Fernet:
-    key = get_settings().encryption_key.encode()
-    digest = hashlib.sha256(key).digest()
+    settings = get_settings()
+    raw = (settings.settings_secret or settings.encryption_key).encode()
+    digest = hashlib.sha256(raw).digest()
     return Fernet(base64.urlsafe_b64encode(digest))
 
 
