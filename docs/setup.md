@@ -6,7 +6,9 @@
 - API keys in `.env` (see `.env.example`). Missing keys degrade gracefully:
   health reports `disconnected`; tests use fixtures; live numbers are never faked.
 
-## Local
+## VPS (isolated)
+
+See [docs/DEPLOY.md](DEPLOY.md). Use compose project `-p zorroagent` in `/opt/zorroagent` on unused port **8088**. Do not reuse occupied ports or other projects' directories.
 
 ```bash
 cp .env.example .env

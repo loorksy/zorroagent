@@ -13,6 +13,8 @@ Claude Agent SDK only. No MCP. No billing. No WAIT as an analytical outcome.
 
 See [docs/setup.md](docs/setup.md). Copy `.env.example` → `.env`.
 
+Isolated VPS deploy (own directory, own ports, own compose project): [docs/DEPLOY.md](docs/DEPLOY.md).
+
 ```bash
 docker compose up -d postgres redis
 cd backend && pip install -e ".[dev]" && pytest -q
