@@ -8,8 +8,12 @@ from app.enums import AnalysisTier, Direction, FillRule, PlanType
 
 
 class LoginIn(BaseModel):
-    email: str
+    email: str = ""
+    username: str = ""
     password: str
+
+    def identifier(self) -> str:
+        return (self.email or self.username).strip()
 
 
 class TokenOut(BaseModel):

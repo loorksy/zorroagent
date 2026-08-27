@@ -76,11 +76,32 @@ Deployed 2026-08-27 on `srv1150752` (`72.60.83.140`), directory `/opt/zorroagent
 - UI (TLS, new cert `zorro.lork.cloud` only): https://zorro.lork.cloud/ and https://zorroagent.lork.cloud/
 - UI (dedicated unused port): http://72.60.83.140:8088/
 - Health: `/healthz` and `/health` on those origins
-- Bootstrap operator file on the VPS (mode 600, not in git): `/opt/zorroagent/.operator-bootstrap`
+- Android APK: https://zorro.lork.cloud/zorro.apk and install notes at https://zorro.lork.cloud/download
+- Operator email (password is **not** in git; hash lives in Postgres): `loorksy@gmail.com`
+- Bootstrap note on the VPS (mode 600, email only, not in git): `/opt/zorroagent/.operator-bootstrap`
 
 Trading keys are entered in **Settings → Providers** after first login. Bootstrap `.env` only needs database, redis, and encryption/JWT secrets.
 
-First login creates the single operator (email + password you submit).
+The single operator row is updated on the host (email + bcrypt hash). First login on an empty database still creates that row; later logins cannot create a second operator.
+
+## Android APK (unsigned debug)
+
+The Capacitor wrapper is built with `CAPACITOR_SERVER_URL=https://zorro.lork.cloud` so the phone talks to the live API, not localhost.
+
+On the VPS, inside `/opt/zorroagent` only:
+
+```bash
+chmod +x scripts/build-android-apk.sh
+./scripts/build-android-apk.sh
+# writes /opt/zorroagent/public/zorro.apk
+# host nginx (zorroagent.conf) aliases /zorro.apk to that file
+nginx -t && systemctl reload nginx
+curl -I https://zorro.lork.cloud/zorro.apk
+```
+
+The build uses a one-off image `zorroagent-android-build:local` (Dockerfile `deploy/android-build.Dockerfile`). SDK stays in that image, not in `/opt/aichart` or other app trees.
+
+Install on a phone: open https://zorro.lork.cloud/download , allow **Install unknown apps** for the browser, then install. This is an unsigned debug APK (no Play Store keystore on the server).
 
 ## Stop / start **only** Zorro
 

@@ -31,7 +31,7 @@
     "email": "E-posta",
     "password": "Şifre",
     "signIn": "Giriş yap",
-    "emailPlaceholder": "operator@local",
+    "emailPlaceholder": "loorksy@gmail.com",
     "passwordPlaceholder": "Şifreniz",
     "error": "Geçersiz kimlik"
   },
@@ -237,5 +237,17 @@
     "convertHint": "Seviyeler kilitlenir — yeni kural yok.",
     "drawHint": "Çizimler ve metin taslak olur.",
     "demoNote": "Canlıdan önce zorunlu demo. Yükseltme bot sayfasındadır."
+  },
+  "download": {
+    "nav": "Android uygulamasını indir",
+    "title": "Zorro’yu Android’e kur",
+    "lead": "APK imzasız hata ayıklama derlemesidir. Tarayıcı için Bilinmeyen uygulamaları yükle iznini açın, sonra kurun.",
+    "button": "zorro.apk indir",
+    "stepsTitle": "Kurulum",
+    "step1": "Bu sayfayı telefonda açın ve İndir’e dokunun.",
+    "step2": "Android engellerse: Ayarlar → Uygulamalar → özel erişim → Bilinmeyen uygulamaları yükle, tarayıcıya izin verin.",
+    "step3": "İndirilen zorro.apk dosyasını açıp Yükle’ye dokunun.",
+    "step4": "Operatör e-postasıyla giriş yapın. Uygulama https://zorro.lork.cloud adresine bağlanır (localhost değil).",
+    "note": "Google Play kullanılmaz. İmzalı sürüm için sunucuda keystore yoktur."
   }
 }

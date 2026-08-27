@@ -31,7 +31,7 @@
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",
-    "emailPlaceholder": "operator@local",
+    "emailPlaceholder": "loorksy@gmail.com",
     "passwordPlaceholder": "Your password",
     "error": "Invalid credentials"
   },
@@ -237,5 +237,17 @@
     "convertHint": "Lock exact levels — no new rules.",
     "drawHint": "Drawings + prose become a draft.",
     "demoNote": "Mandatory demo before live. Promote-to-live lives on the bot page."
+  },
+  "download": {
+    "nav": "Download Android app",
+    "title": "Install Zorro on Android",
+    "lead": "The APK is unsigned debug. Enable Install unknown apps for your browser, then install.",
+    "button": "Download zorro.apk",
+    "stepsTitle": "How to install",
+    "step1": "Open this page on your phone and tap Download.",
+    "step2": "If Android blocks it, open Settings → Apps → special access → Install unknown apps, and allow Chrome or your browser.",
+    "step3": "Open the downloaded zorro.apk and tap Install.",
+    "step4": "Sign in with the operator email. The app talks to https://zorro.lork.cloud (not localhost).",
+    "note": "Google Play is not used. A signed release APK needs a keystore which is not on the server."
   }
 }

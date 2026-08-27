@@ -10,6 +10,7 @@ import { AccountPage } from "./pages/AccountPage";
 import { StrategiesPage, StrategyNewPage, StrategyOptimizePage, StrategyVersionsPage } from "./pages/StrategiesPages";
 import { BotDetailPage, BotLivePage, BotsPage, DemoPage, HistoryPage, MemoryPage, ReviewPage } from "./pages/BotsPages";
 import { LoginPage, SettingsPage } from "./pages/SettingsLogin";
+import { DownloadPage } from "./pages/DownloadPage";
 import { token } from "./lib/api";
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/download" element={<DownloadPage />} />
         <Route
           element={
             <Guard>

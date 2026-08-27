@@ -1,6 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-  <string name="app_name">Zorro</string>
-  <string name="title_activity_main">Zorro</string>
-  <string name="package_name">com.zorro.trading</string>
-  <string name="custom_url_scheme">com.zorro.trading</string>
+    <string name="app_name">Zorro</string>
+    <string name="title_activity_main">Zorro</string>
+    <string name="package_name">com.zorro.trading</string>
+    <string name="custom_url_scheme">com.zorro.trading</string>
 </resources>

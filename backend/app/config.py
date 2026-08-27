@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     public_app_url: str = ""
     webhook_base_url: str = ""
 
-    operator_email: str = "operator@local"
+    operator_email: str = "loorksy@gmail.com"
     operator_password: str = "change-me"
 
     sample_floor: int = 30

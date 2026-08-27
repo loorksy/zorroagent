@@ -24,6 +24,9 @@ frontend/dist/
 frontend/www/
 frontend/android/app/build/
 frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/app/src/main/assets/public/
+frontend/android/captures/
 *.apk
 *.aab
 *.keystore

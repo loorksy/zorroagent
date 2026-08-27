@@ -11,7 +11,7 @@ Copy `.env.example` to `.env`. Missing keys degrade health to `disconnected`; th
 | `DATABASE_URL` | Postgres (`postgresql+asyncpg://…`) |
 | `REDIS_URL` | Redis (Arq + rate limit). If down, `/healthz` redis is red; do not place orders. |
 | `JWT_SECRET` / `APP_SECRET_KEY` / `ENCRYPTION_KEY` | Auth + MetaApi token at rest |
-| `OPERATOR_EMAIL` / `OPERATOR_PASSWORD` | Bootstrap login |
+| `OPERATOR_EMAIL` / `OPERATOR_PASSWORD` | Host bootstrap only. Live login is the single `operators` row (email `loorksy@gmail.com`). Do not commit the password. |
 | `OPERATOR_PIN` / `CONFIRMATION_PIN` | Promote-to-live |
 | `ANTHROPIC_API_KEY` | Claude Agent SDK only. Models: `claude-fable-5`, `claude-opus-5`, `claude-opus-4-8`, `claude-sonnet-5`, `claude-opus-4-7` |
 | `OANDA_API_KEY` / `OANDA_ACCOUNT_ID` / `OANDA_ENVIRONMENT` | **Sole** analysis/chart/indicator prices |
@@ -75,13 +75,17 @@ python3 scripts/qa_screenshots.py   # Vite on :5173, Playwright + Google Chrome
 
 ```bash
 cd frontend && npm run build && npm run cap:sync
-# cap:sync copies dist/ → www/ then `cap sync android`
-# Unsigned APK: open android/ in Android Studio, or
-#   cd android && ./gradlew assembleDebug
-# Requires ANDROID_HOME / Android SDK. This cloud image has neither.
+# Local/dev sync has no remote server.url.
+# Production APK (live API):
+#   CAPACITOR_SERVER_URL=https://zorro.lork.cloud npm run cap:sync:prod
+# Unsigned APK via isolated docker image (VPS /opt/zorroagent):
+#   ./scripts/build-android-apk.sh
+#   → /opt/zorroagent/public/zorro.apk served at https://zorro.lork.cloud/zorro.apk
 ```
 
-Push notifications: Capacitor Android project is present (`MainActivity.java`). Compile path is `assembleDebug` after sync. Not exercised live here.
+The APK is unsigned debug. Phones must allow **Install unknown apps**. A Play Store–signed release is not produced (no keystore on the server).
+
+Push notifications: Capacitor Android project is present (`MainActivity.java`). Compile path is `assembleDebug` after sync.
 
 ## Kill switch
 

@@ -221,18 +221,23 @@ async def models():
 # ---------------------------------------------------------------------------
 @app.post("/api/auth/login")
 async def login(body: LoginIn, db: AsyncSession = Depends(get_db)):
-    op = await db.scalar(select(Operator).where(Operator.email == body.email))
-    if op is None:
+    identifier = body.identifier()
+    if not identifier or not body.password:
+        raise HTTPException(422, "Email and password required")
+    ops = list((await db.scalars(select(Operator))).all())
+    if not ops:
         op = Operator(
-            email=body.email,
+            email=identifier,
             password_hash=hash_password(body.password),
             language=settings.default_language,
         )
         db.add(op)
         await db.commit()
         await db.refresh(op)
-    elif not verify_password(body.password, op.password_hash):
-        raise HTTPException(401, "Invalid credentials")
+    else:
+        op = next((row for row in ops if row.email.lower() == identifier.lower()), None)
+        if op is None or not verify_password(body.password, op.password_hash):
+            raise HTTPException(401, "Invalid credentials")
     return {"access_token": create_token(op.id), "token_type": "bearer", "operator_id": op.id}
 
 

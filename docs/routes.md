@@ -25,6 +25,7 @@
 | `/settings` | JWT | `/api/settings`, `/api/models` |
 | `/history` | JWT | `/api/history` |
 | `/login` | public | `POST /api/auth/login` |
+| `/download` | public | static `GET /zorro.apk` |
 
 Execution: `POST /api/execute` — never invoked from chat/New Analysis/Generate Recommendation.
 Telegram webhook: `POST /api/telegram/webhook` including `/stopall`.

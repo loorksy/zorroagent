@@ -543,10 +543,32 @@ export function SettingsPage() {
   );
 }
 
+export function LangSwitch() {
+  const { i18n } = useTranslation();
+  return (
+    <div className="flex gap-2 text-xs">
+      {(["ar", "en", "tr"] as const).map((lng) => (
+        <button
+          key={lng}
+          type="button"
+          className={`rounded px-2 py-1 min-h-11 ${i18n.language.startsWith(lng) ? "bg-muted" : "text-muted-fg"}`}
+          onClick={() => {
+            void i18n.changeLanguage(lng);
+            applyDir(lng);
+            localStorage.setItem("zorro.lang", lng);
+          }}
+        >
+          {lng.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function LoginPage() {
   const { t } = useTranslation();
   const desk = useDesk();
-  const [email, setEmail] = useState("operator@local");
+  const [email, setEmail] = useState("loorksy@gmail.com");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   return (
@@ -563,17 +585,25 @@ export function LoginPage() {
         }
       }}
     >
-      <h1 className="text-xl font-semibold">{t("nav.login")}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-xl font-semibold">{t("nav.login")}</h1>
+        <LangSwitch />
+      </div>
       <label className="block text-sm">
         {t("auth.email")}
-        <input className="w-full bg-muted rounded px-3 py-2" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("auth.emailPlaceholder")} required />
+        <input className="w-full bg-muted rounded px-3 py-2" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("auth.emailPlaceholder")} autoComplete="username" required />
       </label>
       <label className="block text-sm">
         {t("auth.password")}
-        <input type="password" className="w-full bg-muted rounded px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("auth.passwordPlaceholder")} required />
+        <input type="password" className="w-full bg-muted rounded px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("auth.passwordPlaceholder")} autoComplete="current-password" required />
       </label>
       {err && <p className="text-sell text-sm">{err}</p>}
       <button className="w-full rounded liquid-metal py-2">{t("auth.signIn")}</button>
+      <p className="text-sm">
+        <Link className="underline" to="/download">
+          {t("download.nav")}
+        </Link>
+      </p>
       <p className="text-xs text-muted-fg">{t("app.disclaimer")}</p>
     </form>
   );

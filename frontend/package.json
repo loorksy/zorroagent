@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "cap:sync": "mkdir -p www && cp -a dist/. www/ && cap sync android",
+    "cap:sync:prod": "mkdir -p www && cp -a dist/. www/ && CAPACITOR_SERVER_URL=https://zorro.lork.cloud cap sync android",
     "cap:open": "cap open android"
   },
   "dependencies": {
