@@ -1,0 +1,130 @@
+{
+  "app": {
+    "name": "Zorro",
+    "tagline": "Chat-first analyst",
+    "disclaimer": "Personal analysis, not fund management. Trading involves risk of loss. No monthly return is promised."
+  },
+  "nav": {
+    "ask": "Ask",
+    "today": "Scan Today",
+    "build": "Build",
+    "chart": "Chart",
+    "recommendations": "Recommendations",
+    "watchlist": "Watchlist",
+    "exposure": "Exposure",
+    "account": "Account",
+    "strategies": "Strategies",
+    "demo": "Demo",
+    "bots": "Bots",
+    "memory": "Memory",
+    "review": "Review",
+    "settings": "Settings",
+    "history": "History",
+    "more": "More",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "emailPlaceholder": "operator@local",
+    "passwordPlaceholder": "Your password",
+    "error": "Invalid credentials"
+  },
+  "ask": {
+    "placeholder": "Ask about a catalog instrument…",
+    "send": "Send",
+    "quick": "Quick Scan",
+    "deep": "Deep Analysis",
+    "agentLog": "Agent Log",
+    "pickSymbol": "Select instrument",
+    "model": "Model",
+    "newChat": "New conversation",
+    "noFreeText": "Instruments are chosen from the OANDA catalog. Free-text symbols are not allowed."
+  },
+  "models": {
+    "claude-fable-5": "Fable 5 — strongest",
+    "claude-opus-5": "Opus 5 — deep agent",
+    "claude-opus-4-8": "Opus 4.8 — previous flagship",
+    "claude-sonnet-5": "Sonnet 5 — fast (Quick Scan default)",
+    "claude-opus-4-7": "Opus 4.7 — previous gen"
+  },
+  "card": {
+    "buy": "BUY",
+    "sell": "SELL",
+    "entry": "Entry",
+    "stop": "Stop",
+    "targets": "Targets",
+    "fill": "Fill rule",
+    "next": "Next action",
+    "similar": "Similar past cases",
+    "insufficient": "Insufficient data",
+    "notAvailable": "Not available",
+    "refused": "Platform refused to publish",
+    "nonTradeable": "Non-tradeable Quick Scan"
+  },
+  "buttons": {
+    "newAnalysis": "New Analysis",
+    "generateRec": "Generate recommendation",
+    "execute": "Execute trade",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "kill": "Kill switch",
+    "stopAll": "Stop all",
+    "promoteLive": "Promote to live",
+    "rollback": "Rollback",
+    "activateVersion": "Activate version",
+    "addWatch": "Add to watchlist",
+    "remove": "Remove",
+    "testResolve": "Test-resolve",
+    "optimize": "Optimize",
+    "startDemo": "Start demo",
+    "convertBot": "Convert to bot",
+    "drawIdea": "Draw / describe idea",
+    "library": "From library",
+    "close": "Close",
+    "refresh": "Refresh catalog"
+  },
+  "forms": {
+    "required": "This field is required",
+    "lots": "Lot size",
+    "lotsPlaceholder": "Asked once",
+    "pin": "PIN",
+    "pinPlaceholder": "Or type the canonical symbol",
+    "canonicalConfirm": "Type the canonical symbol to confirm",
+    "notes": "Notes",
+    "notesPlaceholder": "Optional note",
+    "code": "Strategy code",
+    "name": "Name",
+    "namePlaceholder": "Named bot or strategy",
+    "token": "Token (stored encrypted)",
+    "accountId": "MetaApi account id"
+  },
+  "modals": {
+    "execute": "Execute trade",
+    "confirmRec": "Recommendation confirmation",
+    "promote": "Promote bot to live",
+    "kill": "Engage kill switch",
+    "symbol": "Select instrument",
+    "analysis": "New analysis",
+    "convert": "Convert recommendation",
+    "draw": "Draw or describe idea",
+    "alias": "Map execution symbol",
+    "pin": "Confirm with PIN",
+    "version": "Bot versions",
+    "cap": "Exposure cap (R)",
+    "credentials": "Credentials",
+    "disclaimer": "Disclaimer",
+    "stopAll": "Stop all bots"
+  },
+  "banner": {
+    "unreliable": "Price data unreliable"
+  },
+  "empty": {
+    "recs": "No recommendations yet.",
+    "bots": "No bots yet. Create from library, a saved recommendation, or a drawn idea.",
+    "watch": "Watchlist is empty. Pick from the catalog."
+  }
+}

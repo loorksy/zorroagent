@@ -1,0 +1,6 @@
+<resources>
+  <string name="app_name">Zorro</string>
+  <string name="title_activity_main">Zorro</string>
+  <string name="package_name">com.zorro.trading</string>
+  <string name="custom_url_scheme">com.zorro.trading</string>
+</resources>

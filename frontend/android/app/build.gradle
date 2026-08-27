@@ -1,0 +1,22 @@
+plugins {
+  id 'com.android.application'
+}
+android {
+  namespace "com.zorro.trading"
+  compileSdk 34
+  defaultConfig {
+    applicationId "com.zorro.trading"
+    minSdk 23
+    targetSdk 34
+    versionCode 1
+    versionName "1.0.0"
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+}
+dependencies {
+  implementation project(':capacitor-android')
+}

@@ -1,0 +1,130 @@
+{
+  "app": {
+    "name": "Zorro",
+    "tagline": "Sohbet öncelikli analist",
+    "disclaimer": "Kişisel analiz, fon yönetimi değildir. İşlem kayıp riski taşır. Aylık getiri vaadi yoktur."
+  },
+  "nav": {
+    "ask": "Sor",
+    "today": "Bugünü Tara",
+    "build": "Kur",
+    "chart": "Grafik",
+    "recommendations": "Tavsiyeler",
+    "watchlist": "İzleme",
+    "exposure": "Maruziyet",
+    "account": "Hesap",
+    "strategies": "Stratejiler",
+    "demo": "Demo",
+    "bots": "Botlar",
+    "memory": "Bellek",
+    "review": "İnceleme",
+    "settings": "Ayarlar",
+    "history": "Geçmiş",
+    "more": "Daha fazla",
+    "login": "Giriş",
+    "logout": "Çıkış"
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "signIn": "Giriş yap",
+    "emailPlaceholder": "operator@local",
+    "passwordPlaceholder": "Şifreniz",
+    "error": "Geçersiz kimlik"
+  },
+  "ask": {
+    "placeholder": "Katalog enstrümanı hakkında sorun…",
+    "send": "Gönder",
+    "quick": "Hızlı Tarama",
+    "deep": "Derin Analiz",
+    "agentLog": "Ajan günlüğü",
+    "pickSymbol": "Enstrüman seç",
+    "model": "Model",
+    "newChat": "Yeni sohbet",
+    "noFreeText": "Enstrümanlar OANDA kataloğundan seçilir. Serbest metin sembol yok."
+  },
+  "models": {
+    "claude-fable-5": "Fable 5 — en güçlü",
+    "claude-opus-5": "Opus 5 — derin ajan",
+    "claude-opus-4-8": "Opus 4.8 — önceki amiral",
+    "claude-sonnet-5": "Sonnet 5 — hızlı (Hızlı Tarama varsayılan)",
+    "claude-opus-4-7": "Opus 4.7 — önceki nesil"
+  },
+  "card": {
+    "buy": "AL",
+    "sell": "SAT",
+    "entry": "Giriş",
+    "stop": "Stop",
+    "targets": "Hedefler",
+    "fill": "Doldurma kuralı",
+    "next": "Sonraki adım",
+    "similar": "Benzer geçmiş vakalar",
+    "insufficient": "Insufficient data",
+    "notAvailable": "Not available",
+    "refused": "Platform yayımlamayı reddetti",
+    "nonTradeable": "İşlem yapılamaz Hızlı Tarama"
+  },
+  "buttons": {
+    "newAnalysis": "Yeni analiz",
+    "generateRec": "Tavsiye üret",
+    "execute": "İşlemi çalıştır",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "kill": "Acil durdur",
+    "stopAll": "Tümünü durdur",
+    "promoteLive": "Canlıya yükselt",
+    "rollback": "Geri al",
+    "activateVersion": "Sürümü etkinleştir",
+    "addWatch": "İzlemeye ekle",
+    "remove": "Kaldır",
+    "testResolve": "Test-çözümle",
+    "optimize": "Optimize et",
+    "startDemo": "Demoyu başlat",
+    "convertBot": "Bota dönüştür",
+    "drawIdea": "Çiz / tarif et",
+    "library": "Kütüphaneden",
+    "close": "Kapat",
+    "refresh": "Kataloğu yenile"
+  },
+  "forms": {
+    "required": "Bu alan zorunlu",
+    "lots": "Lot",
+    "lotsPlaceholder": "Bir kez sorulur",
+    "pin": "PIN",
+    "pinPlaceholder": "Veya kanonik sembolü yazın",
+    "canonicalConfirm": "Onay için kanonik sembolü yazın",
+    "notes": "Notlar",
+    "notesPlaceholder": "İsteğe bağlı not",
+    "code": "Strateji kodu",
+    "name": "Ad",
+    "namePlaceholder": "Bot veya strateji adı",
+    "token": "Jeton (şifreli saklanır)",
+    "accountId": "MetaApi hesap kimliği"
+  },
+  "modals": {
+    "execute": "İşlemi çalıştır",
+    "confirmRec": "Tavsiye onayı",
+    "promote": "Botu canlıya yükselt",
+    "kill": "Acil durdurmayı aç",
+    "symbol": "Enstrüman seç",
+    "analysis": "Yeni analiz",
+    "convert": "Tavsiyeyi dönüştür",
+    "draw": "Fikri çiz veya tarif et",
+    "alias": "İcra sembolünü eşle",
+    "pin": "PIN ile onayla",
+    "version": "Bot sürümleri",
+    "cap": "Maruziyet tavanı (R)",
+    "credentials": "Kimlik bilgileri",
+    "disclaimer": "Uyarı",
+    "stopAll": "Tüm botları durdur"
+  },
+  "banner": {
+    "unreliable": "Price data unreliable"
+  },
+  "empty": {
+    "recs": "Henüz tavsiye yok.",
+    "bots": "Bot yok. Kütüphane, kayıtlı tavsiye veya çizimden oluşturun.",
+    "watch": "İzleme listesi boş."
+  }
+}

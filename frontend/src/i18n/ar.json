@@ -1,0 +1,130 @@
+{
+  "app": {
+    "name": "Zorro",
+    "tagline": "محلل يبدأ بالمحادثة",
+    "disclaimer": "تحليل شخصي وليس إدارة صناديق. التداول ينطوي على خطر الخسارة. لا وعد بعائد شهري."
+  },
+  "nav": {
+    "ask": "اسأل",
+    "today": "مسح اليوم",
+    "build": "ابنِ",
+    "chart": "الرسم",
+    "recommendations": "التوصيات",
+    "watchlist": "المراقبة",
+    "exposure": "التعرض",
+    "account": "الحساب",
+    "strategies": "الاستراتيجيات",
+    "demo": "تجريبي",
+    "bots": "البوتات",
+    "memory": "الذاكرة",
+    "review": "المراجعة",
+    "settings": "الإعدادات",
+    "history": "السجل",
+    "more": "المزيد",
+    "login": "دخول",
+    "logout": "خروج"
+  },
+  "auth": {
+    "email": "البريد",
+    "password": "كلمة المرور",
+    "signIn": "دخول",
+    "emailPlaceholder": "operator@local",
+    "passwordPlaceholder": "كلمة المرور",
+    "error": "بيانات غير صحيحة"
+  },
+  "ask": {
+    "placeholder": "اسأل عن أداة من الكتالوج…",
+    "send": "إرسال",
+    "quick": "مسح سريع",
+    "deep": "تحليل عميق",
+    "agentLog": "سجل الوكيل",
+    "pickSymbol": "اختر الأداة",
+    "model": "النموذج",
+    "newChat": "محادثة جديدة",
+    "noFreeText": "الأدوات تُختار من كتالوج أواندا. لا حقل رمز حر."
+  },
+  "models": {
+    "claude-fable-5": "Fable 5 — الأقوى",
+    "claude-opus-5": "Opus 5 — وكيل عميق",
+    "claude-opus-4-8": "Opus 4.8 — الجيل السابق الرائد",
+    "claude-sonnet-5": "Sonnet 5 — سريع (الافتراضي للمسح السريع)",
+    "claude-opus-4-7": "Opus 4.7 — الجيل السابق"
+  },
+  "card": {
+    "buy": "شراء",
+    "sell": "بيع",
+    "entry": "الدخول",
+    "stop": "الوقف",
+    "targets": "الأهداف",
+    "fill": "قاعدة التنفيذ",
+    "next": "الخطوة التالية",
+    "similar": "حالات مشابهة سابقة",
+    "insufficient": "Insufficient data",
+    "notAvailable": "Not available",
+    "refused": "رفضت المنصة النشر",
+    "nonTradeable": "مسح سريع غير قابل للتداول"
+  },
+  "buttons": {
+    "newAnalysis": "تحليل جديد",
+    "generateRec": "إنشاء توصية",
+    "execute": "تنفيذ الصفقة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "kill": "مفتاح الإيقاف",
+    "stopAll": "إيقاف الكل",
+    "promoteLive": "ترقية للحي",
+    "rollback": "تراجع",
+    "activateVersion": "تفعيل الإصدار",
+    "addWatch": "أضف للمراقبة",
+    "remove": "حذف",
+    "testResolve": "اختبار المطابقة",
+    "optimize": "تحسين",
+    "startDemo": "بدء التجريبي",
+    "convertBot": "تحويل إلى بوت",
+    "drawIdea": "ارسم / صِف الفكرة",
+    "library": "من المكتبة",
+    "close": "إغلاق",
+    "refresh": "تحديث الكتالوج"
+  },
+  "forms": {
+    "required": "هذا الحقل مطلوب",
+    "lots": "حجم اللوت",
+    "lotsPlaceholder": "يُسأل مرة واحدة",
+    "pin": "الرمز",
+    "pinPlaceholder": "أو اكتب الرمز الكنسي",
+    "canonicalConfirm": "اكتب الرمز الكنسي للتأكيد",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "ملاحظة اختيارية",
+    "code": "كود الاستراتيجية",
+    "name": "الاسم",
+    "namePlaceholder": "اسم البوت أو الاستراتيجية",
+    "token": "الرمز (يُخزَّن مشفراً)",
+    "accountId": "معرّف حساب MetaApi"
+  },
+  "modals": {
+    "execute": "تنفيذ الصفقة",
+    "confirmRec": "تأكيد التوصية",
+    "promote": "ترقية البوت للحي",
+    "kill": "تشغيل مفتاح الإيقاف",
+    "symbol": "اختر الأداة",
+    "analysis": "تحليل جديد",
+    "convert": "تحويل التوصية",
+    "draw": "ارسم أو صِف الفكرة",
+    "alias": "ربط رمز التنفيذ",
+    "pin": "أكد بالرمز",
+    "version": "إصدارات البوت",
+    "cap": "سقف التعرض (R)",
+    "credentials": "بيانات الاعتماد",
+    "disclaimer": "إخلاء مسؤولية",
+    "stopAll": "إيقاف كل البوتات"
+  },
+  "banner": {
+    "unreliable": "Price data unreliable"
+  },
+  "empty": {
+    "recs": "لا توصيات بعد.",
+    "bots": "لا بوتات. أنشئ من المكتبة أو توصية محفوظة أو فكرة مرسومة.",
+    "watch": "قائمة المراقبة فارغة."
+  }
+}
