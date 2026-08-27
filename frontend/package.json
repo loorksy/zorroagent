@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "cap:sync": "cap sync android",
+    "cap:sync": "mkdir -p www && cp -a dist/. www/ && cap sync android",
     "cap:open": "cap open android"
   },
   "dependencies": {

@@ -26,6 +26,18 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+/** List endpoints must never crash the desk if the payload is an object. */
+export function asList(v: unknown): any[] {
+  if (Array.isArray(v)) return v;
+  if (v && typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    for (const k of ["items", "instruments", "conversations", "recommendations", "bots", "accounts", "aliases"]) {
+      if (Array.isArray(o[k])) return o[k] as any[];
+    }
+  }
+  return [];
+}
+
 export const api = {
   health: () => req<any>("/health"),
   login: (email: string, password: string) =>
@@ -36,26 +48,26 @@ export const api = {
   instruments: (q?: string) => req<{ instruments: Instrument[] }>(`/api/instruments${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   candles: (id: string, tf = "15m") => req<any>(`/api/candles/${id}?timeframe=${tf}`),
   price: (id: string) => req<any>(`/api/price/${id}`),
-  conversations: () => req<any[]>("/api/conversations"),
+  conversations: () => req<any>("/api/conversations").then(asList),
   createConversation: () => req<any>("/api/conversations", { method: "POST" }),
   chat: (body: any) => req<any>("/api/chat", { method: "POST", body: JSON.stringify(body) }),
   analyze: (body: any) => req<any>("/api/analyze", { method: "POST", body: JSON.stringify(body) }),
-  recs: () => req<any[]>("/api/recommendations"),
+  recs: () => req<any>("/api/recommendations").then(asList),
   rec: (id: string) => req<any>(`/api/recommendations/${id}`),
-  watchlist: () => req<any[]>("/api/watchlist"),
+  watchlist: () => req<any>("/api/watchlist").then(asList),
   addWatch: (canonical_id: string) => req("/api/watchlist", { method: "POST", body: JSON.stringify({ canonical_id }) }),
   delWatch: (id: string) => req(`/api/watchlist/${id}`, { method: "DELETE" }),
   exposure: () => req<any>("/api/exposure"),
-  accounts: () => req<any[]>("/api/accounts"),
+  accounts: () => req<any>("/api/accounts").then(asList),
   addAccount: (body: any) => req("/api/accounts", { method: "POST", body: JSON.stringify(body) }),
-  aliases: (id: string) => req<any[]>(`/api/accounts/${id}/aliases`),
+  aliases: (id: string) => req<any>(`/api/accounts/${id}/aliases`).then(asList),
   saveAlias: (id: string, body: any) => req(`/api/accounts/${id}/aliases`, { method: "POST", body: JSON.stringify(body) }),
-  strategies: () => req<any[]>("/api/strategies"),
+  strategies: () => req<any>("/api/strategies").then(asList),
   library: () => req<any>("/api/strategies/library"),
   createStrategy: (body: any) => req("/api/strategies", { method: "POST", body: JSON.stringify(body) }),
-  versions: (id: string) => req<any[]>(`/api/strategies/${id}/versions`),
+  versions: (id: string) => req<any>(`/api/strategies/${id}/versions`).then(asList),
   optimize: (id: string, body: any) => req(`/api/strategies/${id}/optimize`, { method: "POST", body: JSON.stringify(body) }),
-  bots: () => req<any[]>("/api/bots"),
+  bots: () => req<any>("/api/bots").then(asList),
   bot: (id: string) => req<any>(`/api/bots/${id}`),
   createBot: (body: any) => req("/api/bots", { method: "POST", body: JSON.stringify(body) }),
   demoBot: (id: string) => req(`/api/bots/${id}/demo`, { method: "POST" }),

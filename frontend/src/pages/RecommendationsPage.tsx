@@ -15,7 +15,7 @@ export function RecommendationsPage() {
       <h1 className="text-xl font-semibold">{t("nav.recommendations")}</h1>
       {rows.map((r) => (
         <Link key={r.id} to={`/recommendations/${r.id}`} className="block">
-          <RecCard rec={r} />
+          <RecCard rec={r} surface="saved" />
         </Link>
       ))}
       {rows.length === 0 && <p className="text-muted-fg">{t("empty.recs")}</p>}

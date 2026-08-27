@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDesk } from "../store";
-import { api, Instrument } from "../lib/api";
+import { api, Instrument, asList } from "../lib/api";
 import { RecCard } from "./RecCard";
 
 function Overlay({ title, children }: { title: string; children: React.ReactNode }) {
@@ -79,7 +79,7 @@ export function Modals() {
 
   useEffect(() => {
     if (modal === "symbol") {
-      void api.instruments(q).then((r) => setItems(r.instruments)).catch(() => setItems([]));
+      void api.instruments(q).then((r) => setItems(asList(r))).catch(() => setItems([]));
     }
   }, [modal, q]);
 

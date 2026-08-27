@@ -21,6 +21,7 @@ htmlcov/
 # Node
 node_modules/
 frontend/dist/
+frontend/www/
 frontend/android/app/build/
 frontend/android/.gradle/
 *.apk
